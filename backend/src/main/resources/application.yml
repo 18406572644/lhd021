@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 6021
   servlet:
     context-path: /api
 
@@ -8,7 +8,7 @@ spring:
     name: idle-mutual-aid
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/idle_mutual_aid?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql:3306/idle_mutual_aid?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: 123456
   jackson:

@@ -38,6 +38,8 @@ coverage/
 # === Vite ===
 .vite/
 *.tsbuildinfo
+vite.config.local.*
+vite.config.*.local
 
 # === IDE ===
 ## IntelliJ IDEA
@@ -111,6 +113,16 @@ Icon
 *~
 .Trash-*
 .nfs*
+
+# === Docker ===
+docker-compose.override.yml
+docker-compose.*.override.yml
+.dockerignore
+*.dockerignore
+.docker/
+.docker-cache/
+Dockerfile.local
+Dockerfile.*.local
 
 # === Environment files ===
 .env
