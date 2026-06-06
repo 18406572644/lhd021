@@ -1,0 +1,46 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: idle-mutual-aid
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/idle_mutual_aid?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: 123456
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.community.idle.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+jwt:
+  secret: idle-mutual-aid-community-2024-secret-key-for-jwt-token-generation
+  expire: 86400000
+  header: Authorization
+
+knife4j:
+  enable: true
+  openapi:
+    title: 社区闲置物资互助系统API
+    description: 社区闲置物资互助系统接口文档
+    version: 1.0.0
+    concat: admin@community.com
+
+logging:
+  level:
+    com.community.idle: debug

@@ -1,0 +1,152 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  color: $text-primary;
+  background: $bg-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: $primary-color;
+  transition: color $transition-fast;
+  &:hover {
+    color: $primary-dark;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: $bg-primary;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $border-color;
+  border-radius: 3px;
+  &:hover {
+    background: $primary-light;
+  }
+}
+
+.page-container {
+  padding: 20px;
+  background: $bg-primary;
+  min-height: calc(100vh - #{$header-height});
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  .page-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: $text-primary;
+  }
+}
+
+.card-container {
+  @include card-style;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  .search-form {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+}
+
+.table-container {
+  @include card-style;
+  :deep(.el-table) {
+    border-radius: $radius-md;
+  }
+}
+
+.status-tag {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  &.status-0 { background: #fef0f0; color: $danger-color; }
+  &.status-1 { background: #ecf5ff; color: $primary-color; }
+  &.status-2 { background: #f0f9eb; color: $success-color; }
+  &.status-3 { background: #fdf6ec; color: $warning-color; }
+}
+
+.credit-excellent { color: #67c23a; font-weight: 600; }
+.credit-good { color: #409eff; font-weight: 600; }
+.credit-average { color: #e6a23c; font-weight: 600; }
+.credit-poor { color: #f56c6c; font-weight: 600; }
+.credit-very-poor { color: #909399; font-weight: 600; }
+
+:deep(.el-button--primary) {
+  background: $primary-color;
+  border-color: $primary-color;
+  &:hover {
+    background: $primary-dark;
+    border-color: $primary-dark;
+  }
+}
+
+:deep(.el-pagination) {
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  @include card-style;
+  padding: 30px;
+}
+
+.stats-card {
+  @include card-style;
+  padding: 20px;
+  @include hover-effect;
+  .stats-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: $primary-color;
+    margin-bottom: 8px;
+  }
+  .stats-label {
+    font-size: 14px;
+    color: $text-secondary;
+  }
+  .stats-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: linear-gradient(135deg, $primary-light, $primary-color);
+    color: #fff;
+  }
+}

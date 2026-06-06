@@ -1,0 +1,51 @@
+$primary-color: #1e88e5;
+$primary-light: #64b5f6;
+$primary-dark: #1565c0;
+$secondary-color: #ffffff;
+$text-primary: #1a1a2e;
+$text-secondary: #5a6c7d;
+$text-light: #90a4ae;
+$bg-primary: #f5f9ff;
+$bg-secondary: #ffffff;
+$border-color: #e3f2fd;
+$border-light: #f0f4f8;
+$success-color: #2ecc71;
+$warning-color: #f39c12;
+$danger-color: #e74c3c;
+$info-color: #3498db;
+
+$header-height: 60px;
+$sidebar-width: 220px;
+$sidebar-collapsed-width: 64px;
+
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 12px;
+
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+
+$page-padding: 20px;
+$success-bg: #f0f9eb;
+$warning-bg: #fdf6ec;
+$danger-bg: #fef0f0;
+$info-bg: #ecf5ff;
+
+@mixin card-style {
+  background: $bg-secondary;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+  border: 1px solid $border-light;
+}
+
+@mixin hover-effect {
+  transition: all $transition-normal;
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+}
