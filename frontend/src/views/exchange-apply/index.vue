@@ -156,8 +156,8 @@ const loadData = async () => {
   loading.value = true
   try {
     const res = await api.exchangeApply.page(queryForm)
-    tableData.value = res.data.records
-    total.value = res.data.total
+    tableData.value = res.list
+    total.value = res.total
   } catch (e) {
     console.error(e)
   } finally {

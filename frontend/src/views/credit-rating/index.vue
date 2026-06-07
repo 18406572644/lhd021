@@ -188,9 +188,9 @@ const loadData = async () => {
       api.auth.getCurrentUser(),
       api.creditRating.page(queryForm)
     ])
-    currentUser.value = userRes.data
-    tableData.value = recordRes.data.records
-    total.value = recordRes.data.total
+    currentUser.value = userRes
+    tableData.value = recordRes.list
+    total.value = recordRes.total
   } catch (e) {
     console.error(e)
     currentUser.value = {
@@ -219,7 +219,7 @@ const handleSizeChange = () => {
 const loadUsers = async () => {
   try {
     const res = await api.auth.listUsers()
-    userList.value = res.data
+    userList.value = res
   } catch (e) {
     userList.value = [
       { id: 1, nickname: '张三' },

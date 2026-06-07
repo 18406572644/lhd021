@@ -204,8 +204,8 @@ const loadData = async () => {
   loading.value = true
   try {
     const res = await api.idleItem.page(queryForm)
-    tableData.value = res.data.records
-    total.value = res.data.total
+    tableData.value = res.list
+    total.value = res.total
   } catch (e) {
     console.error(e)
   } finally {
@@ -236,7 +236,7 @@ const handleExchange = async (row) => {
   currentItem.value = row
   try {
     const res = await api.idleItem.getMyItems()
-    myItems.value = res.data
+    myItems.value = res.list
     exchangeForm.myItemId = null
     exchangeForm.remark = ''
     exchangeVisible.value = true

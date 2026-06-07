@@ -176,8 +176,8 @@ const loadPendingItems = async () => {
   loading.value = true
   try {
     const res = await api.itemArchive.getPendingArchive(queryForm)
-    pendingItems.value = res.data.records
-    pendingTotal.value = res.data.total
+    pendingItems.value = res.list
+    pendingTotal.value = res.total
   } catch (e) {
     console.error(e)
     pendingItems.value = [
@@ -193,8 +193,8 @@ const loadArchivedItems = async () => {
   loading.value = true
   try {
     const res = await api.itemArchive.page(archiveQuery)
-    archivedItems.value = res.data.records
-    archiveTotal.value = res.data.total
+    archivedItems.value = res.list
+    archiveTotal.value = res.total
   } catch (e) {
     console.error(e)
     archivedItems.value = [
@@ -258,7 +258,7 @@ const handleRestore = async (row) => {
 const handleAutoArchive = async () => {
   ElMessageBox.confirm('确定执行自动归档吗？系统将自动归档下架超过30天的物品。', '提示', { type: 'warning' }).then(async () => {
     const res = await api.itemArchive.autoArchive()
-    ElMessage.success(`自动归档完成，共归档 ${res.data} 件物品`)
+    ElMessage.success(`自动归档完成，共归档 ${res} 件物品`)
     loadPendingItems()
   }).catch(() => {})
 }
