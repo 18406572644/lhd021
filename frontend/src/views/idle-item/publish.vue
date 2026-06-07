@@ -129,7 +129,7 @@ const rules = {
 const loadPickupPoints = async () => {
   try {
     const res = await api.pickupPoint.list()
-    pickupPoints.value = res.data
+    pickupPoints.value = res
   } catch (e) {
     console.error(e)
   }
