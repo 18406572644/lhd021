@@ -12,7 +12,26 @@
         <el-table-column prop="username" label="用户名" width="140" />
         <el-table-column prop="nickname" label="昵称" width="140" />
         <el-table-column prop="phone" label="手机号" width="140" />
-        <el-table-column label="角色" min-width="300">
+        <el-table-column label="信用分" width="100">
+          <template #default="{ row }">
+            {{ row.creditScore }}
+          </template>
+        </el-table-column>
+        <el-table-column label="信用等级" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getCreditLevelTag(row.creditLevel)">
+              {{ row.creditLevel }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.status === 1 ? 'success' : 'danger'">
+              {{ row.status === 1 ? '正常' : '禁用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="角色" min-width="200">
           <template #default="{ row }">
             <el-tag 
               v-for="role in row.roles" 
@@ -25,7 +44,7 @@
             <span v-if="!row.roles || row.roles.length === 0" class="text-muted">未分配角色</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" fixed="right">
+        <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-button 
               type="primary" 
@@ -34,6 +53,24 @@
               v-permission="'system:user:assign'"
             >
               分配角色
+            </el-button>
+            <el-button 
+              v-if="row.status === 1"
+              type="danger" 
+              link 
+              @click="handleDisable(row)"
+              v-permission="'system:user:edit'"
+            >
+              禁用
+            </el-button>
+            <el-button 
+              v-else
+              type="success" 
+              link 
+              @click="handleEnable(row)"
+              v-permission="'system:user:edit'"
+            >
+              启用
             </el-button>
           </template>
         </el-table-column>
@@ -127,6 +164,37 @@ const handleSubmit = async () => {
   ElMessage.success('角色分配成功')
   dialogVisible.value = false
   fetchUserList()
+}
+
+const getCreditLevelTag = (level) => {
+  const levelMap = {
+    '优秀': 'success',
+    '良好': 'primary',
+    '一般': 'warning',
+    '较差': 'info',
+    '很差': 'danger'
+  }
+  return levelMap[level] || 'info'
+}
+
+const handleDisable = async (row) => {
+  try {
+    await systemApi.disableUser(row.id)
+    ElMessage.success('用户禁用成功')
+    fetchUserList()
+  } catch (error) {
+    console.error('禁用用户失败:', error)
+  }
+}
+
+const handleEnable = async (row) => {
+  try {
+    await systemApi.enableUser(row.id)
+    ElMessage.success('用户启用成功')
+    fetchUserList()
+  } catch (error) {
+    console.error('启用用户失败:', error)
+  }
 }
 
 const handleSizeChange = (val) => {

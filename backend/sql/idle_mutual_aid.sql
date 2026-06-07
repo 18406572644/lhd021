@@ -440,3 +440,39 @@ UPDATE sys_user SET dept_id = 2 WHERE id = 2;
 UPDATE sys_user SET dept_id = 2 WHERE id = 3;
 UPDATE sys_user SET dept_id = 3 WHERE id = 4;
 UPDATE sys_user SET dept_id = 3 WHERE id = 5;
+
+DROP TABLE IF EXISTS sys_operation_log;
+CREATE TABLE sys_operation_log (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '日志ID',
+    operation_type VARCHAR(50) NOT NULL COMMENT '操作类型：EXCHANGE_APPROVE-审核通过 EXCHANGE_REJECT-审核拒绝 ITEM_OFFLINE-物品下架 CREDIT_ADJUST-信用分调整 USER_DISABLE-用户禁用 USER_ENABLE-用户启用 PICKUP_POINT_CONFIG-自提点配置 ROLE_ASSIGN-角色分配 PERMISSION_CONFIG-权限配置 OTHER-其他',
+    operation_name VARCHAR(100) NOT NULL COMMENT '操作名称',
+    operator_id BIGINT NOT NULL COMMENT '操作人ID',
+    operator_name VARCHAR(50) NOT NULL COMMENT '操作人用户名',
+    operation_time DATETIME NOT NULL COMMENT '操作时间',
+    operation_ip VARCHAR(50) COMMENT '操作IP地址',
+    target_id BIGINT COMMENT '操作对象ID',
+    target_type VARCHAR(50) COMMENT '操作对象类型',
+    target_name VARCHAR(200) COMMENT '操作对象名称',
+    before_data TEXT COMMENT '变更前数据（JSON格式）',
+    after_data TEXT COMMENT '变更后数据（JSON格式）',
+    change_summary VARCHAR(500) COMMENT '变更摘要',
+    is_sensitive TINYINT DEFAULT 0 COMMENT '是否敏感操作：0-否 1-是',
+    confirmed TINYINT DEFAULT 0 COMMENT '是否已二次确认：0-否 1-是',
+    confirm_token VARCHAR(100) COMMENT '二次确认令牌',
+    remark VARCHAR(500) COMMENT '备注',
+    create_time DATETIME COMMENT '创建时间',
+    PRIMARY KEY (id),
+    KEY idx_operation_type (operation_type),
+    KEY idx_operator_id (operator_id),
+    KEY idx_operation_time (operation_time),
+    KEY idx_target_id (target_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='管理员操作日志表';
+
+INSERT INTO sys_permission (permission_code, permission_name, permission_type, parent_id, path, component, icon, sort_order, visible, status, api_method, api_path) VALUES
+('operation_log', '操作日志', 1, 25, 'operation-log', 'system/operation-log/index', 'Document', 4, 1, 1, NULL, NULL),
+('operation_log_list', '日志列表', 2, 44, NULL, NULL, NULL, 1, 1, 1, 'GET', '/operation-log/page'),
+('operation_log_export', '导出日志', 2, 44, NULL, NULL, 'Download', 2, 1, 1, 'GET', '/operation-log/export'),
+('operation_log_detail', '查看详情', 2, 44, NULL, NULL, 'View', 3, 1, 1, 'GET', '/operation-log/*');
+
+INSERT INTO sys_role_permission (role_id, permission_id, create_time) VALUES
+(1, 44, NOW()), (1, 45, NOW()), (1, 46, NOW()), (1, 47, NOW());

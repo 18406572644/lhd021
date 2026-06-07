@@ -4,7 +4,9 @@ import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
 import com.community.idle.common.StatusConverter;
+import com.community.idle.common.annotation.OperationLog;
 import com.community.idle.common.annotation.RequirePermission;
+import com.community.idle.common.enums.OperationType;
 import com.community.idle.dto.IdleItemDTO;
 import com.community.idle.entity.IdleItem;
 import com.community.idle.service.IdleItemService;
@@ -61,6 +63,7 @@ public class IdleItemController {
 
     @Operation(summary = "下架物品")
     @PostMapping("/{id}/offline")
+    @OperationLog(type = OperationType.ITEM_OFFLINE, targetType = "IDLE_ITEM")
     public Result<Void> offline(@PathVariable Long id) {
         idleItemService.offline(id);
         return Result.success();

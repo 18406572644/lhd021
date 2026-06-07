@@ -4,7 +4,9 @@ import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
 import com.community.idle.common.StatusConverter;
+import com.community.idle.common.annotation.OperationLog;
 import com.community.idle.common.annotation.RequirePermission;
+import com.community.idle.common.enums.OperationType;
 import com.community.idle.dto.ExchangeApplyDTO;
 import com.community.idle.entity.ExchangeApply;
 import com.community.idle.service.ExchangeApplyService;
@@ -35,6 +37,7 @@ public class ExchangeApplyController {
 
     @Operation(summary = "审核通过")
     @PostMapping("/{id}/approve")
+    @OperationLog(type = OperationType.EXCHANGE_APPROVE, targetType = "EXCHANGE_APPLY")
     public Result<Void> approve(@PathVariable Long id, @RequestParam(required = false) String remark) {
         exchangeApplyService.approve(id, remark);
         return Result.success();
@@ -42,6 +45,7 @@ public class ExchangeApplyController {
 
     @Operation(summary = "审核拒绝")
     @PostMapping("/{id}/reject")
+    @OperationLog(type = OperationType.EXCHANGE_REJECT, targetType = "EXCHANGE_APPLY")
     public Result<Void> reject(@PathVariable Long id, @RequestParam String rejectReason) {
         exchangeApplyService.reject(id, rejectReason);
         return Result.success();

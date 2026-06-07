@@ -1,7 +1,9 @@
 package com.community.idle.controller;
 
 import com.community.idle.common.Result;
+import com.community.idle.common.annotation.OperationLog;
 import com.community.idle.common.annotation.RequirePermission;
+import com.community.idle.common.enums.OperationType;
 import com.community.idle.dto.AssignRoleDTO;
 import com.community.idle.dto.LoginDTO;
 import com.community.idle.dto.RegisterDTO;
@@ -56,9 +58,28 @@ public class AuthController {
     @Operation(summary = "为用户分配角色")
     @PostMapping("/user/{userId}/roles")
     @RequirePermission("system_user_assign_role")
+    @OperationLog(type = OperationType.ROLE_ASSIGN, targetType = "USER")
     public Result<Void> assignRoles(@PathVariable Long userId, @Valid @RequestBody AssignRoleDTO dto) {
         dto.setUserId(userId);
         authService.assignRoles(dto);
+        return Result.success();
+    }
+
+    @Operation(summary = "禁用用户")
+    @PostMapping("/user/{userId}/disable")
+    @RequirePermission("system_user_edit")
+    @OperationLog(type = OperationType.USER_DISABLE, targetType = "USER")
+    public Result<Void> disableUser(@PathVariable Long userId) {
+        authService.updateUserStatus(userId, 0);
+        return Result.success();
+    }
+
+    @Operation(summary = "启用用户")
+    @PostMapping("/user/{userId}/enable")
+    @RequirePermission("system_user_edit")
+    @OperationLog(type = OperationType.USER_ENABLE, targetType = "USER")
+    public Result<Void> enableUser(@PathVariable Long userId) {
+        authService.updateUserStatus(userId, 1);
         return Result.success();
     }
 

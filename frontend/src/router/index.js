@@ -96,6 +96,12 @@ const asyncRoutes = [
         name: 'UserRoleManagement',
         component: () => import('@/views/system/user-role.vue'),
         meta: { title: '用户角色', icon: 'Avatar', permission: 'system:user:assign' }
+      },
+      {
+        path: 'operation-log',
+        name: 'OperationLog',
+        component: () => import('@/views/system/operation-log/index.vue'),
+        meta: { title: '操作日志', icon: 'Document', permission: 'system:operation-log:view' }
       }
     ]
   }

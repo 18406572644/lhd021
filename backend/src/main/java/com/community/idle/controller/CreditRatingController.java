@@ -3,6 +3,8 @@ package com.community.idle.controller;
 import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
+import com.community.idle.common.annotation.OperationLog;
+import com.community.idle.common.enums.OperationType;
 import com.community.idle.dto.CreditAdjustDTO;
 import com.community.idle.entity.CreditRating;
 import com.community.idle.service.CreditRatingService;
@@ -60,6 +62,8 @@ public class CreditRatingController {
 
     @Operation(summary = "调整用户信用分")
     @PostMapping("/adjust")
+    @OperationLog(type = OperationType.CREDIT_ADJUST, targetType = "USER",
+            targetIdParam = "userId", confirmThreshold = 10, confirmThresholdParam = "changeScore")
     public Result<Void> adjustCredit(@Valid @RequestBody CreditAdjustDTO dto) {
         creditRatingService.adjustCredit(
             dto.getUserId(),

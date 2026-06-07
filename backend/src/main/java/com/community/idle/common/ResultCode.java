@@ -28,7 +28,10 @@ public enum ResultCode {
 
     CREDIT_INSUFFICIENT(5001, "用户信用不足"),
 
-    ARCHIVE_ERROR(6001, "归档失败");
+    ARCHIVE_ERROR(6001, "归档失败"),
+
+    CONFIRM_REQUIRED(4001, "敏感操作需要二次确认"),
+    CONFIRM_TOKEN_INVALID(4002, "确认令牌无效或已过期");
 
     private final Integer code;
     private final String message;

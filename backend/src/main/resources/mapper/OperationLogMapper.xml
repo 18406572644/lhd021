@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.community.idle.mapper.OperationLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.community.idle.entity.OperationLog">
+        <id column="id" property="id"/>
+        <result column="operation_type" property="operationType"/>
+        <result column="operation_name" property="operationName"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_name" property="operatorName"/>
+        <result column="operation_time" property="operationTime"/>
+        <result column="operation_ip" property="operationIp"/>
+        <result column="target_id" property="targetId"/>
+        <result column="target_type" property="targetType"/>
+        <result column="target_name" property="targetName"/>
+        <result column="before_data" property="beforeData"/>
+        <result column="after_data" property="afterData"/>
+        <result column="change_summary" property="changeSummary"/>
+        <result column="is_sensitive" property="isSensitive"/>
+        <result column="confirmed" property="confirmed"/>
+        <result column="confirm_token" property="confirmToken"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, operation_type, operation_name, operator_id, operator_name, operation_time,
+        operation_ip, target_id, target_type, target_name, before_data, after_data,
+        change_summary, is_sensitive, confirmed, confirm_token, remark, create_time
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sys_operation_log
+        <where>
+            <if test="operatorId != null">
+                AND operator_id = #{operatorId}
+            </if>
+            <if test="operatorName != null and operatorName != ''">
+                AND operator_name LIKE CONCAT('%', #{operatorName}, '%')
+            </if>
+            <if test="operationType != null and operationType != ''">
+                AND operation_type = #{operationType}
+            </if>
+            <if test="startTime != null">
+                AND operation_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND operation_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY operation_time DESC
+    </select>
+
+    <select id="selectExportList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM sys_operation_log
+        <where>
+            <if test="operatorId != null">
+                AND operator_id = #{operatorId}
+            </if>
+            <if test="operatorName != null and operatorName != ''">
+                AND operator_name LIKE CONCAT('%', #{operatorName}, '%')
+            </if>
+            <if test="operationType != null and operationType != ''">
+                AND operation_type = #{operationType}
+            </if>
+            <if test="startTime != null">
+                AND operation_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND operation_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY operation_time DESC
+    </select>
+
+</mapper>

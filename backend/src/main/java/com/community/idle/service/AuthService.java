@@ -17,4 +17,6 @@ public interface AuthService {
     void assignRoles(AssignRoleDTO dto);
     List<Role> getUserRoles(Long userId);
     void logout();
+    void updateUserStatus(Long userId, Integer status);
+    User getUserById(Long userId);
 }

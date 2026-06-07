@@ -3,7 +3,9 @@ package com.community.idle.controller;
 import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
+import com.community.idle.common.annotation.OperationLog;
 import com.community.idle.common.annotation.RequirePermission;
+import com.community.idle.common.enums.OperationType;
 import com.community.idle.dto.RoleDTO;
 import com.community.idle.entity.Permission;
 import com.community.idle.entity.Role;
@@ -58,6 +60,7 @@ public class SystemController {
     @Operation(summary = "新增角色")
     @PostMapping("/role")
     @RequirePermission("system_role_add")
+    @OperationLog(type = OperationType.ROLE_ADD, targetType = "ROLE")
     public Result<Void> addRole(@Valid @RequestBody RoleDTO dto) {
         roleService.add(dto);
         return Result.success();
@@ -66,6 +69,7 @@ public class SystemController {
     @Operation(summary = "更新角色")
     @PutMapping("/role")
     @RequirePermission("system_role_edit")
+    @OperationLog(type = OperationType.ROLE_EDIT, targetType = "ROLE")
     public Result<Void> updateRole(@Valid @RequestBody RoleDTO dto) {
         roleService.update(dto);
         return Result.success();
@@ -74,6 +78,7 @@ public class SystemController {
     @Operation(summary = "删除角色")
     @DeleteMapping("/role/{id}")
     @RequirePermission("system_role_delete")
+    @OperationLog(type = OperationType.ROLE_DELETE, targetType = "ROLE")
     public Result<Void> deleteRole(@PathVariable Long id) {
         roleService.delete(id);
         return Result.success();
@@ -82,6 +87,7 @@ public class SystemController {
     @Operation(summary = "分配权限给角色")
     @PostMapping("/role/{id}/permissions")
     @RequirePermission("system_role_assign_permission")
+    @OperationLog(type = OperationType.PERMISSION_CONFIG, targetType = "ROLE")
     public Result<Void> assignPermissions(@PathVariable Long id, @RequestBody Map<String, List<Long>> body) {
         List<Long> permissionIds = body.get("permissionIds");
         roleService.assignPermissions(id, permissionIds);
@@ -133,6 +139,7 @@ public class SystemController {
     @Operation(summary = "新增权限")
     @PostMapping("/permission")
     @RequirePermission("system_permission_add")
+    @OperationLog(type = OperationType.PERMISSION_CONFIG, targetType = "PERMISSION")
     public Result<Void> addPermission(@Valid @RequestBody Permission permission) {
         permissionService.add(permission);
         return Result.success();
@@ -141,6 +148,7 @@ public class SystemController {
     @Operation(summary = "更新权限")
     @PutMapping("/permission")
     @RequirePermission("system_permission_edit")
+    @OperationLog(type = OperationType.PERMISSION_CONFIG, targetType = "PERMISSION")
     public Result<Void> updatePermission(@Valid @RequestBody Permission permission) {
         permissionService.update(permission);
         return Result.success();
@@ -149,6 +157,7 @@ public class SystemController {
     @Operation(summary = "删除权限")
     @DeleteMapping("/permission/{id}")
     @RequirePermission("system_permission_delete")
+    @OperationLog(type = OperationType.PERMISSION_CONFIG, targetType = "PERMISSION")
     public Result<Void> deletePermission(@PathVariable Long id) {
         permissionService.delete(id);
         return Result.success();

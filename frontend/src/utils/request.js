@@ -7,11 +7,16 @@ const request = axios.create({
   timeout: 15000
 })
 
+const pendingRequests = new Map()
+
 request.interceptors.request.use(
   (config) => {
     const userStore = useUserStore()
     if (userStore.token) {
       config.headers.Authorization = `Bearer ${userStore.token}`
+    }
+    if (config.confirmToken) {
+      config.headers['X-Confirm-Token'] = config.confirmToken
     }
     return config
   },
@@ -36,6 +41,8 @@ request.interceptors.response.use(
           window.location.href = '/login'
         })
       return Promise.reject(new Error(res.message || 'Error'))
+    } else if (res.code === 4001) {
+      return handleConfirmRequired(response, res.message)
     } else {
       ElMessage.error(res.message || '系统错误')
       return Promise.reject(new Error(res.message || 'Error'))
@@ -58,5 +65,38 @@ request.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+function handleConfirmRequired(response, message) {
+  const config = response.config
+  const requestKey = `${config.method}_${config.url}_${JSON.stringify(config.data || config.params)}`
+
+  if (pendingRequests.has(requestKey)) {
+    return pendingRequests.get(requestKey)
+  }
+
+  const messageParts = message.split(':')
+  const token = messageParts.length > 1 ? messageParts[messageParts.length - 1] : ''
+  const displayMessage = messageParts[0] || '此操作敏感，需要二次确认'
+
+  const promise = ElMessageBox.confirm(displayMessage, '操作确认', {
+    confirmButtonText: '确认执行',
+    cancelButtonText: '取消',
+    type: 'warning',
+    distinguishCancelAndClose: true
+  }).then(() => {
+    const retryConfig = { ...config, confirmToken: token }
+    return request(retryConfig)
+  }).catch((action) => {
+    if (action === 'cancel' || action === 'close') {
+      return Promise.reject(new Error('已取消操作'))
+    }
+    return Promise.reject(new Error('确认失败'))
+  }).finally(() => {
+    pendingRequests.delete(requestKey)
+  })
+
+  pendingRequests.set(requestKey, promise)
+  return promise
+}
 
 export default request

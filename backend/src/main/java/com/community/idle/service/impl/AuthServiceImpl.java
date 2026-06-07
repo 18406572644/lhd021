@@ -220,4 +220,20 @@ public class AuthServiceImpl implements AuthService {
         UserContext.remove();
         PermissionContext.clear();
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserStatus(Long userId, Integer status) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(ResultCode.USER_NOT_EXIST);
+        }
+        user.setStatus(status);
+        userMapper.updateById(user);
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        return userMapper.selectById(userId);
+    }
 }

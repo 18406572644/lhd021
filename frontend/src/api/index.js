@@ -107,7 +107,19 @@ export const systemApi = {
   assignPermissions: (roleId, permissionIds) => request.post(`/system/role/${roleId}/permissions`, permissionIds),
   assignDataPermissions: (roleId, data) => request.post(`/system/role/${roleId}/data-permissions`, data),
   getUserRoles: (userId) => request.get(`/system/user/${userId}/roles`),
-  assignUserRoles: (userId, roleIds) => request.post(`/system/user/${userId}/roles`, roleIds)
+  assignUserRoles: (userId, roleIds) => request.post(`/system/user/${userId}/roles`, roleIds),
+  disableUser: (userId) => request.post(`/auth/user/${userId}/disable`),
+  enableUser: (userId) => request.post(`/auth/user/${userId}/enable`)
+}
+
+export const operationLogApi = {
+  page: (params) => request.get('/operation-log/page', { params }),
+  detail: (id) => request.get(`/operation-log/${id}`),
+  export: (params) => {
+    const queryString = new URLSearchParams(params).toString()
+    window.open(`/api/operation-log/export?${queryString}`, '_blank')
+  },
+  getConfirmToken: () => request.post('/operation-log/confirm-token')
 }
 
 export const api = {
@@ -119,5 +131,6 @@ export const api = {
   creditRating: creditRatingApi,
   itemArchive: itemArchiveApi,
   statistics: statisticsApi,
-  system: systemApi
+  system: systemApi,
+  operationLog: operationLogApi
 }
