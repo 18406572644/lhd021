@@ -98,6 +98,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { UserFilled } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
+import { usePermissionStore } from '@/store/permission'
 
 const router = useRouter()
 const route = useRoute()

@@ -91,21 +91,23 @@ export const statisticsApi = {
 }
 
 export const systemApi = {
-  getMenuTree: () => request.get('/system/menu/tree'),
+  getMenuTree: () => request.get('/system/permission/menus'),
   getPermissionTree: () => request.get('/system/permission/tree'),
+  listPermissions: (permissionType) => request.get('/system/permission/list', { params: { permissionType } }),
   getPermissionList: () => request.get('/system/permission/list'),
+  getPermissionDetail: (id) => request.get(`/system/permission/${id}`),
   addPermission: (data) => request.post('/system/permission', data),
   updatePermission: (data) => request.put('/system/permission', data),
   deletePermission: (id) => request.delete(`/system/permission/${id}`),
-  
   getRolePage: (params) => request.get('/system/role/page', { params }),
   getRoleList: () => request.get('/system/role/list'),
   getRoleDetail: (id) => request.get(`/system/role/${id}`),
   addRole: (data) => request.post('/system/role', data),
   updateRole: (data) => request.put('/system/role', data),
   deleteRole: (id) => request.delete(`/system/role/${id}`),
-  assignPermissions: (roleId, permissionIds) => request.post(`/system/role/${roleId}/permissions`, permissionIds),
-  assignDataPermissions: (roleId, data) => request.post(`/system/role/${roleId}/data-permissions`, data),
+  assignPermissions: (roleId, permissionIds) => request.post(`/system/role/${roleId}/permissions`, { permissionIds }),
+  getRolePermissions: (id) => request.get(`/system/role/${id}/permissions`),
+  assignDataPermissions: (roleId, data) => request.post(`/system/role/${roleId}/data-permissions`, data, { params: { businessType: 'PICKUP_POINT' } }),
   getUserRoles: (userId) => request.get(`/system/user/${userId}/roles`),
   assignUserRoles: (userId, roleIds) => request.post(`/system/user/${userId}/roles`, roleIds),
   disableUser: (userId) => request.post(`/auth/user/${userId}/disable`),
