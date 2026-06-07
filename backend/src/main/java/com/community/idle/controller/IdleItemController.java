@@ -3,13 +3,13 @@ package com.community.idle.controller;
 import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
+import com.community.idle.common.StatusConverter;
 import com.community.idle.dto.IdleItemDTO;
 import com.community.idle.entity.IdleItem;
 import com.community.idle.service.IdleItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,10 +17,13 @@ import java.util.List;
 @Tag(name = "闲置物品管理")
 @RestController
 @RequestMapping("/idle-item")
-@RequiredArgsConstructor
 public class IdleItemController {
 
     private final IdleItemService idleItemService;
+
+    public IdleItemController(IdleItemService idleItemService) {
+        this.idleItemService = idleItemService;
+    }
 
     @Operation(summary = "发布闲置物品")
     @PostMapping
@@ -41,8 +44,9 @@ public class IdleItemController {
     public Result<PageResult<IdleItem>> page(@ModelAttribute PageQuery query,
                                              @RequestParam(required = false) String keyword,
                                              @RequestParam(required = false) String category,
-                                             @RequestParam(required = false) Integer status) {
-        return Result.success(idleItemService.page(query, keyword, category, status));
+                                             @RequestParam(required = false) String status) {
+        Integer statusInt = StatusConverter.getItemStatus(status);
+        return Result.success(idleItemService.page(query, keyword, category, statusInt));
     }
 
     @Operation(summary = "获取物品详情")
@@ -68,8 +72,9 @@ public class IdleItemController {
     @Operation(summary = "我发布的物品")
     @GetMapping("/my")
     public Result<PageResult<IdleItem>> myPublish(@ModelAttribute PageQuery query,
-                                                  @RequestParam(required = false) Integer status) {
-        return Result.success(idleItemService.myPublish(query, status));
+                                                  @RequestParam(required = false) String status) {
+        Integer statusInt = StatusConverter.getItemStatus(status);
+        return Result.success(idleItemService.myPublish(query, statusInt));
     }
 
     @Operation(summary = "获取物品分类列表")

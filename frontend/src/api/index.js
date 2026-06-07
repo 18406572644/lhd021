@@ -2,9 +2,10 @@ import request from '@/utils/request'
 
 export const authApi = {
   login: (data) => request.post('/auth/login', data),
-  register: (data) => request.post('/auth/register'),
+  register: (data) => request.post('/auth/register', data),
   getCurrentUser: () => request.get('/auth/current'),
-  logout: () => request.post('/auth/logout')
+  logout: () => request.post('/auth/logout'),
+  listUsers: () => request.get('/auth/users')
 }
 
 export const idleItemApi = {
@@ -13,8 +14,9 @@ export const idleItemApi = {
   page: (params) => request.get('/idle-item/page', { params }),
   detail: (id) => request.get(`/idle-item/${id}`),
   offline: (id) => request.post(`/idle-item/${id}/offline`),
-  offlineBatch: (ids) => request.post('/idle-item/offline/batch', ids),
+  batchOffline: (ids) => request.post('/idle-item/offline/batch', ids),
   myPublish: (params) => request.get('/idle-item/my', { params }),
+  getMyItems: () => request.get('/idle-item/my', { params: { pageNum: 1, pageSize: 1000 } }),
   getCategories: () => request.get('/idle-item/categories')
 }
 
@@ -37,6 +39,7 @@ export const pickupPointApi = {
   delete: (id) => request.delete(`/pickup-point/${id}`),
   detail: (id) => request.get(`/pickup-point/${id}`),
   page: (params) => request.get('/pickup-point/page', { params }),
+  list: () => request.get('/pickup-point/list'),
   listAll: () => request.get('/pickup-point/list'),
   enable: (id) => request.post(`/pickup-point/${id}/enable`),
   disable: (id) => request.post(`/pickup-point/${id}/disable`)
@@ -56,24 +59,44 @@ export const creditRatingApi = {
   myRecord: (params) => request.get('/credit-rating/my', { params }),
   getUserHistory: (userId) => request.get(`/credit-rating/user/${userId}`),
   getLevelConfig: () => request.get('/credit-rating/level-config'),
-  calculateLevel: (userId) => request.post(`/credit-rating/calculate/${userId}`)
+  calculateLevel: (userId) => request.post(`/credit-rating/calculate/${userId}`),
+  adjust: (data) => request.post('/credit-rating/adjust', data)
 }
 
 export const itemArchiveApi = {
   archive: (itemId, reason) => request.post(`/item-archive/archive/${itemId}`, null, { params: { reason } }),
-  archiveBatch: (itemIds, reason) => request.post('/item-archive/archive/batch', itemIds, { params: { reason } }),
+  batchArchive: (itemIds, reason) => request.post('/item-archive/archive/batch', itemIds, { params: { reason } }),
   autoArchive: () => request.post('/item-archive/auto-archive'),
   page: (params) => request.get('/item-archive/page', { params }),
   detail: (id) => request.get(`/item-archive/${id}`),
-  restore: (id) => request.post(`/item-archive/restore/${id}`)
+  restore: (id) => request.post(`/item-archive/restore/${id}`),
+  getPendingArchive: (params) => request.get('/idle-item/page', { params: { ...params, status: '已下架' } })
 }
 
 export const statisticsApi = {
   generateMonthly: (month) => request.post(`/statistics/generate/${month}`),
   generateCurrent: () => request.post('/statistics/generate/current'),
+  generate: (month) => request.post(`/statistics/generate/${month}`),
   page: (params) => request.get('/statistics/page', { params }),
   detail: (id) => request.get(`/statistics/${id}`),
   getByMonth: (month) => request.get(`/statistics/month/${month}`),
+  getMonthly: (month) => request.get(`/statistics/month/${month}`),
   getDashboard: () => request.get('/statistics/dashboard'),
-  getTrendData: (months) => request.get('/statistics/trend', { params: { months } })
+  getOverview: () => request.get('/statistics/dashboard'),
+  getTrendData: (months) => request.get('/statistics/trend', { params: { months } }),
+  getTrend: () => request.get('/statistics/trend'),
+  getCategoryStats: () => request.get('/statistics/category-stats'),
+  getCreditDistribution: () => request.get('/statistics/credit-distribution'),
+  getHistory: () => request.get('/statistics/page', { params: { pageNum: 1, pageSize: 12 } })
+}
+
+export const api = {
+  auth: authApi,
+  idleItem: idleItemApi,
+  exchangeApply: exchangeApplyApi,
+  pickupPoint: pickupPointApi,
+  claimRecord: claimRecordApi,
+  creditRating: creditRatingApi,
+  itemArchive: itemArchiveApi,
+  statistics: statisticsApi
 }

@@ -117,7 +117,7 @@
     <el-dialog v-model="exchangeVisible" title="申请互换" width="500px">
       <el-form :model="exchangeForm" label-width="100px">
         <el-form-item label="目标物品">
-          <el-input v-model="currentItem?.name" disabled />
+          <el-input :model-value="currentItem?.name" disabled />
         </el-form-item>
         <el-form-item label="提供物品">
           <el-select v-model="exchangeForm.myItemId" placeholder="选择您的物品" style="width: 100%">

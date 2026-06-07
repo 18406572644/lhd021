@@ -7,7 +7,6 @@ import com.community.idle.entity.ItemArchive;
 import com.community.idle.service.ItemArchiveService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,10 +14,13 @@ import java.util.List;
 @Tag(name = "闲置下架归档")
 @RestController
 @RequestMapping("/item-archive")
-@RequiredArgsConstructor
 public class ItemArchiveController {
 
     private final ItemArchiveService itemArchiveService;
+
+    public ItemArchiveController(ItemArchiveService itemArchiveService) {
+        this.itemArchiveService = itemArchiveService;
+    }
 
     @Operation(summary = "手动归档物品")
     @PostMapping("/archive/{itemId}")

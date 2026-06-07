@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.community.idle.common.BusinessException;
+import com.community.idle.common.EntityConverter;
 import com.community.idle.common.JwtUtils;
 import com.community.idle.common.ResultCode;
 import com.community.idle.common.UserContext;
@@ -13,20 +14,24 @@ import com.community.idle.dto.RegisterDTO;
 import com.community.idle.entity.User;
 import com.community.idle.mapper.UserMapper;
 import com.community.idle.service.AuthService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final UserMapper userMapper;
     private final JwtUtils jwtUtils;
+
+    public AuthServiceImpl(UserMapper userMapper, JwtUtils jwtUtils) {
+        this.userMapper = userMapper;
+        this.jwtUtils = jwtUtils;
+    }
 
     @Override
     public Map<String, Object> login(LoginDTO dto) {
@@ -48,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtils.generateToken(user.getId(), user.getUsername(), user.getRole());
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
-        result.put("user", user);
+        result.put("user", EntityConverter.convertUser(user));
         return result;
     }
 
@@ -81,7 +86,12 @@ public class AuthServiceImpl implements AuthService {
         if (userId == null) {
             throw new BusinessException(ResultCode.UNAUTHORIZED);
         }
-        return userMapper.selectById(userId);
+        return EntityConverter.convertUser(userMapper.selectById(userId));
+    }
+
+    @Override
+    public List<User> listAllUsers() {
+        return EntityConverter.convertUserList(userMapper.selectList(null));
     }
 
     @Override

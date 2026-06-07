@@ -9,7 +9,6 @@ import com.community.idle.entity.User;
 import com.community.idle.mapper.CreditRatingMapper;
 import com.community.idle.mapper.UserMapper;
 import com.community.idle.service.CreditRatingService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,11 +16,15 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class CreditRatingServiceImpl implements CreditRatingService {
 
     private final CreditRatingMapper creditRatingMapper;
     private final UserMapper userMapper;
+
+    public CreditRatingServiceImpl(CreditRatingMapper creditRatingMapper, UserMapper userMapper) {
+        this.creditRatingMapper = creditRatingMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -97,7 +100,9 @@ public class CreditRatingServiceImpl implements CreditRatingService {
         }
         IPage<CreditRating> page = creditRatingMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<CreditRating> result = PageResult.of(page);
+        result.setList(EntityConverter.convertCreditRatingList(result.getList()));
+        return result;
     }
 
     @Override
@@ -107,14 +112,17 @@ public class CreditRatingServiceImpl implements CreditRatingService {
         wrapper.eq(CreditRating::getUserId, userId);
         IPage<CreditRating> page = creditRatingMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<CreditRating> result = PageResult.of(page);
+        result.setList(EntityConverter.convertCreditRatingList(result.getList()));
+        return result;
     }
 
     @Override
     public List<CreditRating> getUserCreditHistory(Long userId) {
-        return creditRatingMapper.selectList(new LambdaQueryWrapper<CreditRating>()
+        List<CreditRating> list = creditRatingMapper.selectList(new LambdaQueryWrapper<CreditRating>()
                 .eq(CreditRating::getUserId, userId)
                 .orderByDesc(CreditRating::getCreateTime));
+        return EntityConverter.convertCreditRatingList(list);
     }
 
     @Override
@@ -155,6 +163,51 @@ public class CreditRatingServiceImpl implements CreditRatingService {
             return "较差";
         } else {
             return "很差";
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void adjustCredit(Long userId, Integer changeScore, String changeType, String reason, Long operatorId, String operatorName) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(ResultCode.USER_NOT_EXIST);
+        }
+        BigDecimal changeValue = new BigDecimal(String.valueOf(Math.abs(changeScore)));
+        BigDecimal newScore;
+        String actualChangeType;
+        
+        if (changeScore >= 0) {
+            newScore = user.getCreditScore().add(changeValue);
+            actualChangeType = "ADD";
+        } else {
+            newScore = user.getCreditScore().subtract(changeValue);
+            if (newScore.compareTo(BigDecimal.ZERO) < 0) {
+                newScore = BigDecimal.ZERO;
+            }
+            actualChangeType = "SUBTRACT";
+        }
+        
+        String newLevel = calculateLevel(newScore);
+        CreditRating rating = new CreditRating();
+        rating.setUserId(userId);
+        rating.setUsername(user.getUsername());
+        rating.setScore(newScore);
+        rating.setLevel(newLevel);
+        rating.setChangeType(changeType != null ? changeType : actualChangeType);
+        rating.setChangeValue(changeValue);
+        rating.setChangeReason(reason);
+        rating.setOperatorId(operatorId != null ? operatorId : UserContext.getUserId());
+        rating.setOperatorName(operatorName != null ? operatorName : UserContext.getUsername());
+        creditRatingMapper.insert(rating);
+        
+        user.setCreditScore(newScore);
+        user.setCreditLevel(newLevel);
+        userMapper.updateById(user);
+        
+        if (newScore.compareTo(new BigDecimal("60")) < 0) {
+            user.setStatus(0);
+            userMapper.updateById(user);
         }
     }
 }

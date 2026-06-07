@@ -1,9 +1,5 @@
 package com.community.idle.common;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 public class UserContext {
 
     private static final ThreadLocal<CurrentUser> HOLDER = new ThreadLocal<>();
@@ -40,12 +36,42 @@ public class UserContext {
         HOLDER.remove();
     }
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class CurrentUser {
         private Long userId;
         private String username;
         private Integer role;
+
+        public CurrentUser() {
+        }
+
+        public CurrentUser(Long userId, String username, Integer role) {
+            this.userId = userId;
+            this.username = username;
+            this.role = role;
+        }
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public void setUserId(Long userId) {
+            this.userId = userId;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public Integer getRole() {
+            return role;
+        }
+
+        public void setRole(Integer role) {
+            this.role = role;
+        }
     }
 }

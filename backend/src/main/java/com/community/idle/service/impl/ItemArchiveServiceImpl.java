@@ -13,7 +13,6 @@ import com.community.idle.mapper.IdleItemMapper;
 import com.community.idle.mapper.ItemArchiveMapper;
 import com.community.idle.mapper.PickupPointMapper;
 import com.community.idle.service.ItemArchiveService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +22,17 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class ItemArchiveServiceImpl implements ItemArchiveService {
 
     private final ItemArchiveMapper itemArchiveMapper;
     private final IdleItemMapper idleItemMapper;
     private final PickupPointMapper pickupPointMapper;
+
+    public ItemArchiveServiceImpl(ItemArchiveMapper itemArchiveMapper, IdleItemMapper idleItemMapper, PickupPointMapper pickupPointMapper) {
+        this.itemArchiveMapper = itemArchiveMapper;
+        this.idleItemMapper = idleItemMapper;
+        this.pickupPointMapper = pickupPointMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -146,7 +150,9 @@ public class ItemArchiveServiceImpl implements ItemArchiveService {
         }
         IPage<ItemArchive> page = itemArchiveMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<ItemArchive> result = PageResult.of(page);
+        result.setList(EntityConverter.convertItemArchiveList(result.getList()));
+        return result;
     }
 
     @Override
@@ -155,7 +161,7 @@ public class ItemArchiveServiceImpl implements ItemArchiveService {
         if (archive == null) {
             throw new BusinessException("归档记录不存在");
         }
-        return archive;
+        return EntityConverter.convertItemArchive(archive);
     }
 
     @Override
@@ -184,6 +190,6 @@ public class ItemArchiveServiceImpl implements ItemArchiveService {
             pickupPointMapper.updateById(pickupPoint);
             itemArchiveMapper.deleteById(id);
         }
-        return archive;
+        return EntityConverter.convertItemArchive(archive);
     }
 }

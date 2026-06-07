@@ -8,18 +8,21 @@ import com.community.idle.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "认证管理")
 @RestController
 @RequestMapping("/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @Operation(summary = "用户登录")
     @PostMapping("/login")
@@ -38,6 +41,12 @@ public class AuthController {
     @GetMapping("/current")
     public Result<User> getCurrentUser() {
         return Result.success(authService.getCurrentUser());
+    }
+
+    @Operation(summary = "获取所有用户列表")
+    @GetMapping("/users")
+    public Result<List<User>> listUsers() {
+        return Result.success(authService.listAllUsers());
     }
 
     @Operation(summary = "用户登出")

@@ -1,8 +1,5 @@
 package com.community.idle.common;
 
-import lombok.Getter;
-
-@Getter
 public class BusinessException extends RuntimeException {
 
     private final Integer code;
@@ -24,5 +21,13 @@ public class BusinessException extends RuntimeException {
         super(resultCode.getMessage());
         this.code = resultCode.getCode();
         this.message = resultCode.getMessage();
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

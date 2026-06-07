@@ -7,7 +7,6 @@ import com.community.idle.common.*;
 import com.community.idle.entity.*;
 import com.community.idle.mapper.*;
 import com.community.idle.service.StatisticsService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
 
     private final MonthlyStatisticsMapper monthlyStatisticsMapper;
@@ -31,6 +29,17 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final ItemArchiveMapper itemArchiveMapper;
     private final CreditRatingMapper creditRatingMapper;
     private final PickupPointMapper pickupPointMapper;
+
+    public StatisticsServiceImpl(MonthlyStatisticsMapper monthlyStatisticsMapper, UserMapper userMapper, IdleItemMapper idleItemMapper, ExchangeApplyMapper exchangeApplyMapper, ClaimRecordMapper claimRecordMapper, ItemArchiveMapper itemArchiveMapper, CreditRatingMapper creditRatingMapper, PickupPointMapper pickupPointMapper) {
+        this.monthlyStatisticsMapper = monthlyStatisticsMapper;
+        this.userMapper = userMapper;
+        this.idleItemMapper = idleItemMapper;
+        this.exchangeApplyMapper = exchangeApplyMapper;
+        this.claimRecordMapper = claimRecordMapper;
+        this.itemArchiveMapper = itemArchiveMapper;
+        this.creditRatingMapper = creditRatingMapper;
+        this.pickupPointMapper = pickupPointMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -116,7 +125,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         } else {
             monthlyStatisticsMapper.insert(statistics);
         }
-        return statistics;
+        return EntityConverter.convertMonthlyStatistics(statistics);
     }
 
     @Override
@@ -130,7 +139,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         IPage<MonthlyStatistics> page = monthlyStatisticsMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("statistics_month"))),
                 new LambdaQueryWrapper<>());
-        return PageResult.of(page);
+        PageResult<MonthlyStatistics> result = PageResult.of(page);
+        result.setList(EntityConverter.convertMonthlyStatisticsList(result.getList()));
+        return result;
     }
 
     @Override
@@ -139,7 +150,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         if (statistics == null) {
             throw new BusinessException("统计记录不存在");
         }
-        return statistics;
+        return EntityConverter.convertMonthlyStatistics(statistics);
     }
 
     @Override
@@ -149,7 +160,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         if (statistics == null) {
             return generateMonthly(month);
         }
-        return statistics;
+        return EntityConverter.convertMonthlyStatistics(statistics);
     }
 
     @Override
@@ -281,5 +292,42 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
         trend.put("creditDistribution", creditDist);
         return trend;
+    }
+
+    @Override
+    public List<Map<String, Object>> getCategoryStats() {
+        List<IdleItem> allItems = idleItemMapper.selectList(new LambdaQueryWrapper<IdleItem>()
+                .select(IdleItem::getCategory, IdleItem::getId));
+        Map<String, Integer> categoryCount = new HashMap<>();
+        for (IdleItem item : allItems) {
+            if (item.getCategory() != null && !item.getCategory().isEmpty()) {
+                categoryCount.merge(item.getCategory(), 1, Integer::sum);
+            }
+        }
+        List<Map<String, Object>> categoryList = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : categoryCount.entrySet()) {
+            Map<String, Object> catMap = new LinkedHashMap<>();
+            catMap.put("name", entry.getKey());
+            catMap.put("count", entry.getValue());
+            categoryList.add(catMap);
+        }
+        categoryList.sort((a, b) -> ((Integer) b.get("count")).compareTo((Integer) a.get("count")));
+        return categoryList;
+    }
+
+    @Override
+    public Map<String, Object> getCreditDistribution() {
+        Map<String, Object> creditDist = new LinkedHashMap<>();
+        creditDist.put("excellent", userMapper.selectCount(new LambdaQueryWrapper<User>()
+                .eq(User::getCreditLevel, "优秀").eq(User::getStatus, 1)));
+        creditDist.put("good", userMapper.selectCount(new LambdaQueryWrapper<User>()
+                .eq(User::getCreditLevel, "良好").eq(User::getStatus, 1)));
+        creditDist.put("average", userMapper.selectCount(new LambdaQueryWrapper<User>()
+                .eq(User::getCreditLevel, "一般").eq(User::getStatus, 1)));
+        creditDist.put("poor", userMapper.selectCount(new LambdaQueryWrapper<User>()
+                .eq(User::getCreditLevel, "较差").eq(User::getStatus, 1)));
+        creditDist.put("veryPoor", userMapper.selectCount(new LambdaQueryWrapper<User>()
+                .eq(User::getCreditLevel, "很差").eq(User::getStatus, 1)));
+        return creditDist;
     }
 }

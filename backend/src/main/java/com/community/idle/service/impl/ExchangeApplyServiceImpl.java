@@ -15,7 +15,6 @@ import com.community.idle.mapper.IdleItemMapper;
 import com.community.idle.mapper.UserMapper;
 import com.community.idle.service.CreditRatingService;
 import com.community.idle.service.ExchangeApplyService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,13 +24,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class ExchangeApplyServiceImpl implements ExchangeApplyService {
 
     private final ExchangeApplyMapper exchangeApplyMapper;
     private final IdleItemMapper idleItemMapper;
     private final UserMapper userMapper;
     private final CreditRatingService creditRatingService;
+
+    public ExchangeApplyServiceImpl(ExchangeApplyMapper exchangeApplyMapper, IdleItemMapper idleItemMapper, UserMapper userMapper, CreditRatingService creditRatingService) {
+        this.exchangeApplyMapper = exchangeApplyMapper;
+        this.idleItemMapper = idleItemMapper;
+        this.userMapper = userMapper;
+        this.creditRatingService = creditRatingService;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -203,7 +208,7 @@ public class ExchangeApplyServiceImpl implements ExchangeApplyService {
     public PageResult<ExchangeApply> page(PageQuery query, Integer status, String keyword) {
         LambdaQueryWrapper<ExchangeApply> wrapper = new LambdaQueryWrapper<>();
         if (status != null) {
-            wrapper.eq(ExchangeApply::getStatus, status);
+            wrapper.eq(ExchangeApply::getStatusValue, status);
         }
         if (StrUtil.isNotBlank(keyword)) {
             wrapper.and(w -> w.like(ExchangeApply::getApplyNo, keyword)
@@ -212,7 +217,9 @@ public class ExchangeApplyServiceImpl implements ExchangeApplyService {
         }
         IPage<ExchangeApply> page = exchangeApplyMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<ExchangeApply> result = PageResult.of(page);
+        result.setList(EntityConverter.convertExchangeApplyList(result.getList()));
+        return result;
     }
 
     @Override
@@ -221,11 +228,13 @@ public class ExchangeApplyServiceImpl implements ExchangeApplyService {
         LambdaQueryWrapper<ExchangeApply> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ExchangeApply::getApplicantId, userId);
         if (status != null) {
-            wrapper.eq(ExchangeApply::getStatus, status);
+            wrapper.eq(ExchangeApply::getStatusValue, status);
         }
         IPage<ExchangeApply> page = exchangeApplyMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<ExchangeApply> result = PageResult.of(page);
+        result.setList(EntityConverter.convertExchangeApplyList(result.getList()));
+        return result;
     }
 
     @Override
@@ -234,11 +243,13 @@ public class ExchangeApplyServiceImpl implements ExchangeApplyService {
         LambdaQueryWrapper<ExchangeApply> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ExchangeApply::getItemOwnerId, userId);
         if (status != null) {
-            wrapper.eq(ExchangeApply::getStatus, status);
+            wrapper.eq(ExchangeApply::getStatusValue, status);
         }
         IPage<ExchangeApply> page = exchangeApplyMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<ExchangeApply> result = PageResult.of(page);
+        result.setList(EntityConverter.convertExchangeApplyList(result.getList()));
+        return result;
     }
 
     @Override
@@ -247,22 +258,22 @@ public class ExchangeApplyServiceImpl implements ExchangeApplyService {
         if (apply == null) {
             throw new BusinessException(ResultCode.EXCHANGE_NOT_EXIST);
         }
-        return apply;
+        return EntityConverter.convertExchangeApply(apply);
     }
 
     @Override
     public Map<String, Object> getStatusCount() {
         Map<String, Object> result = new HashMap<>();
         result.put("pending", exchangeApplyMapper.selectCount(new LambdaQueryWrapper<ExchangeApply>()
-                .eq(ExchangeApply::getStatus, 0)));
+                .eq(ExchangeApply::getStatusValue, 0)));
         result.put("approved", exchangeApplyMapper.selectCount(new LambdaQueryWrapper<ExchangeApply>()
-                .eq(ExchangeApply::getStatus, 1)));
+                .eq(ExchangeApply::getStatusValue, 1)));
         result.put("rejected", exchangeApplyMapper.selectCount(new LambdaQueryWrapper<ExchangeApply>()
-                .eq(ExchangeApply::getStatus, 2)));
+                .eq(ExchangeApply::getStatusValue, 2)));
         result.put("completed", exchangeApplyMapper.selectCount(new LambdaQueryWrapper<ExchangeApply>()
-                .eq(ExchangeApply::getStatus, 3)));
+                .eq(ExchangeApply::getStatusValue, 3)));
         result.put("cancelled", exchangeApplyMapper.selectCount(new LambdaQueryWrapper<ExchangeApply>()
-                .eq(ExchangeApply::getStatus, 4)));
+                .eq(ExchangeApply::getStatusValue, 4)));
         return result;
     }
 }

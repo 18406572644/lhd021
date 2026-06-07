@@ -3,11 +3,12 @@ package com.community.idle.controller;
 import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
+import com.community.idle.dto.CreditAdjustDTO;
 import com.community.idle.entity.CreditRating;
 import com.community.idle.service.CreditRatingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,10 +17,13 @@ import java.util.Map;
 @Tag(name = "用户信用评级")
 @RestController
 @RequestMapping("/credit-rating")
-@RequiredArgsConstructor
 public class CreditRatingController {
 
     private final CreditRatingService creditRatingService;
+
+    public CreditRatingController(CreditRatingService creditRatingService) {
+        this.creditRatingService = creditRatingService;
+    }
 
     @Operation(summary = "分页查询信用记录")
     @GetMapping("/page")
@@ -51,6 +55,20 @@ public class CreditRatingController {
     @PostMapping("/calculate/{userId}")
     public Result<Void> calculateCreditLevel(@PathVariable Long userId) {
         creditRatingService.calculateCreditLevel(userId);
+        return Result.success();
+    }
+
+    @Operation(summary = "调整用户信用分")
+    @PostMapping("/adjust")
+    public Result<Void> adjustCredit(@Valid @RequestBody CreditAdjustDTO dto) {
+        creditRatingService.adjustCredit(
+            dto.getUserId(),
+            dto.getChangeScore(),
+            dto.getChangeType(),
+            dto.getReason(),
+            null,
+            dto.getOperatorName()
+        );
         return Result.success();
     }
 }

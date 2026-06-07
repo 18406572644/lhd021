@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.community.idle.common.BusinessException;
+import com.community.idle.common.EntityConverter;
 import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.ResultCode;
@@ -17,7 +18,6 @@ import com.community.idle.mapper.IdleItemMapper;
 import com.community.idle.mapper.PickupPointMapper;
 import com.community.idle.mapper.UserMapper;
 import com.community.idle.service.IdleItemService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,12 +27,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class IdleItemServiceImpl implements IdleItemService {
 
     private final IdleItemMapper idleItemMapper;
     private final PickupPointMapper pickupPointMapper;
     private final UserMapper userMapper;
+
+    public IdleItemServiceImpl(IdleItemMapper idleItemMapper, PickupPointMapper pickupPointMapper, UserMapper userMapper) {
+        this.idleItemMapper = idleItemMapper;
+        this.pickupPointMapper = pickupPointMapper;
+        this.userMapper = userMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -127,7 +132,9 @@ public class IdleItemServiceImpl implements IdleItemService {
         }
         IPage<IdleItem> page = idleItemMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<IdleItem> result = PageResult.of(page);
+        result.setList(EntityConverter.convertIdleItemList(result.getList()));
+        return result;
     }
 
     @Override
@@ -138,7 +145,7 @@ public class IdleItemServiceImpl implements IdleItemService {
         }
         item.setViewCount(item.getViewCount() + 1);
         idleItemMapper.updateById(item);
-        return item;
+        return EntityConverter.convertIdleItem(item);
     }
 
     @Override
@@ -185,7 +192,9 @@ public class IdleItemServiceImpl implements IdleItemService {
         }
         IPage<IdleItem> page = idleItemMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<IdleItem> result = PageResult.of(page);
+        result.setList(EntityConverter.convertIdleItemList(result.getList()));
+        return result;
     }
 
     @Override

@@ -7,18 +7,21 @@ import com.community.idle.entity.MonthlyStatistics;
 import com.community.idle.service.StatisticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "月度互助数据统计")
 @RestController
 @RequestMapping("/statistics")
-@RequiredArgsConstructor
 public class StatisticsController {
 
     private final StatisticsService statisticsService;
+
+    public StatisticsController(StatisticsService statisticsService) {
+        this.statisticsService = statisticsService;
+    }
 
     @Operation(summary = "生成指定月份统计数据")
     @PostMapping("/generate/{month}")
@@ -60,5 +63,17 @@ public class StatisticsController {
     @GetMapping("/trend")
     public Result<Map<String, Object>> getTrendData(@RequestParam(defaultValue = "6") Integer months) {
         return Result.success(statisticsService.getTrendData(months));
+    }
+
+    @Operation(summary = "获取分类统计")
+    @GetMapping("/category-stats")
+    public Result<List<Map<String, Object>>> getCategoryStats() {
+        return Result.success(statisticsService.getCategoryStats());
+    }
+
+    @Operation(summary = "获取信用分布")
+    @GetMapping("/credit-distribution")
+    public Result<Map<String, Object>> getCreditDistribution() {
+        return Result.success(statisticsService.getCreditDistribution());
     }
 }

@@ -16,7 +16,6 @@ import com.community.idle.mapper.IdleItemMapper;
 import com.community.idle.mapper.UserMapper;
 import com.community.idle.service.ClaimRecordService;
 import com.community.idle.service.CreditRatingService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,13 +23,19 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 
 @Service
-@RequiredArgsConstructor
 public class ClaimRecordServiceImpl implements ClaimRecordService {
 
     private final ClaimRecordMapper claimRecordMapper;
     private final IdleItemMapper idleItemMapper;
     private final UserMapper userMapper;
     private final CreditRatingService creditRatingService;
+
+    public ClaimRecordServiceImpl(ClaimRecordMapper claimRecordMapper, IdleItemMapper idleItemMapper, UserMapper userMapper, CreditRatingService creditRatingService) {
+        this.claimRecordMapper = claimRecordMapper;
+        this.idleItemMapper = idleItemMapper;
+        this.userMapper = userMapper;
+        this.creditRatingService = creditRatingService;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -75,7 +80,7 @@ public class ClaimRecordServiceImpl implements ClaimRecordService {
         record.setPickupCode(pickupCode);
         record.setRemark(dto.getRemark());
         claimRecordMapper.insert(record);
-        return record;
+        return EntityConverter.convertClaimRecord(record);
     }
 
     @Override
@@ -156,7 +161,9 @@ public class ClaimRecordServiceImpl implements ClaimRecordService {
         }
         IPage<ClaimRecord> page = claimRecordMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<ClaimRecord> result = PageResult.of(page);
+        result.setList(EntityConverter.convertClaimRecordList(result.getList()));
+        return result;
     }
 
     @Override
@@ -170,7 +177,9 @@ public class ClaimRecordServiceImpl implements ClaimRecordService {
         }
         IPage<ClaimRecord> page = claimRecordMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<ClaimRecord> result = PageResult.of(page);
+        result.setList(EntityConverter.convertClaimRecordList(result.getList()));
+        return result;
     }
 
     @Override
@@ -179,6 +188,6 @@ public class ClaimRecordServiceImpl implements ClaimRecordService {
         if (record == null) {
             throw new BusinessException("领用记录不存在");
         }
-        return record;
+        return EntityConverter.convertClaimRecord(record);
     }
 }

@@ -10,7 +10,6 @@ import com.community.idle.entity.PickupPoint;
 import com.community.idle.mapper.IdleItemMapper;
 import com.community.idle.mapper.PickupPointMapper;
 import com.community.idle.service.PickupPointService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +17,15 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class PickupPointServiceImpl implements PickupPointService {
 
     private final PickupPointMapper pickupPointMapper;
     private final IdleItemMapper idleItemMapper;
+
+    public PickupPointServiceImpl(PickupPointMapper pickupPointMapper, IdleItemMapper idleItemMapper) {
+        this.pickupPointMapper = pickupPointMapper;
+        this.idleItemMapper = idleItemMapper;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -76,7 +79,7 @@ public class PickupPointServiceImpl implements PickupPointService {
         if (pickupPoint == null) {
             throw new BusinessException(ResultCode.PICKUP_NOT_EXIST);
         }
-        return pickupPoint;
+        return EntityConverter.convertPickupPoint(pickupPoint);
     }
 
     @Override
@@ -92,14 +95,17 @@ public class PickupPointServiceImpl implements PickupPointService {
         }
         IPage<PickupPoint> page = pickupPointMapper.selectPage(
                 query.buildPage(Arrays.asList(OrderItem.desc("create_time"))), wrapper);
-        return PageResult.of(page);
+        PageResult<PickupPoint> result = PageResult.of(page);
+        result.setList(EntityConverter.convertPickupPointList(result.getList()));
+        return result;
     }
 
     @Override
     public List<PickupPoint> listAll() {
-        return pickupPointMapper.selectList(new LambdaQueryWrapper<PickupPoint>()
+        List<PickupPoint> list = pickupPointMapper.selectList(new LambdaQueryWrapper<PickupPoint>()
                 .eq(PickupPoint::getStatus, 1)
                 .orderByAsc(PickupPoint::getPointName));
+        return EntityConverter.convertPickupPointList(list);
     }
 
     @Override

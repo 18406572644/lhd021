@@ -1,13 +1,13 @@
 package com.community.idle.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
 @TableName("sys_user")
 public class User implements Serializable {
 
@@ -18,6 +18,7 @@ public class User implements Serializable {
 
     private String username;
 
+    @JsonIgnore
     private String password;
 
     private String nickname;
@@ -40,6 +41,18 @@ public class User implements Serializable {
 
     private Integer releaseCount;
 
+    @TableField(exist = false)
+    private Integer publishCount;
+
+    @TableField(exist = false)
+    private Integer claimCount;
+
+    @TableField(exist = false)
+    private String roleName;
+
+    @TableField(exist = false)
+    private String statusName;
+
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 
@@ -47,5 +60,166 @@ public class User implements Serializable {
     private LocalDateTime updateTime;
 
     @TableLogic
+    @JsonIgnore
     private Integer deleted;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public Integer getRole() {
+        return role;
+    }
+
+    public void setRole(Integer role) {
+        this.role = role;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public BigDecimal getCreditScore() {
+        return creditScore;
+    }
+
+    public void setCreditScore(BigDecimal creditScore) {
+        this.creditScore = creditScore;
+    }
+
+    public String getCreditLevel() {
+        return creditLevel;
+    }
+
+    public void setCreditLevel(String creditLevel) {
+        this.creditLevel = creditLevel;
+    }
+
+    public Integer getExchangeCount() {
+        return exchangeCount;
+    }
+
+    public void setExchangeCount(Integer exchangeCount) {
+        this.exchangeCount = exchangeCount;
+    }
+
+    public Integer getReleaseCount() {
+        return releaseCount;
+    }
+
+    public void setReleaseCount(Integer releaseCount) {
+        this.releaseCount = releaseCount;
+    }
+
+    public Integer getPublishCount() {
+        return publishCount;
+    }
+
+    public void setPublishCount(Integer publishCount) {
+        this.publishCount = publishCount;
+    }
+
+    public Integer getClaimCount() {
+        return claimCount;
+    }
+
+    public void setClaimCount(Integer claimCount) {
+        this.claimCount = claimCount;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public String getStatusName() {
+        return statusName;
+    }
+
+    public void setStatusName(String statusName) {
+        this.statusName = statusName;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Integer getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Integer deleted) {
+        this.deleted = deleted;
+    }
 }

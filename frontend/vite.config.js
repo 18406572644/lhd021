@@ -13,7 +13,7 @@ export default defineConfig({
     port: 2021,
     proxy: {
       '/api': {
-        target: 'http://backend:6021',
+        target: 'http://localhost:6021',
         changeOrigin: true
       }
     }

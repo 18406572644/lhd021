@@ -16,4 +16,5 @@ public interface CreditRatingService {
     List<CreditRating> getUserCreditHistory(Long userId);
     Map<String, Object> getCreditLevelConfig();
     void calculateCreditLevel(Long userId);
+    void adjustCredit(Long userId, Integer changeScore, String changeType, String reason, Long operatorId, String operatorName);
 }

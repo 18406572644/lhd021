@@ -3,12 +3,12 @@ package com.community.idle.controller;
 import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
+import com.community.idle.common.StatusConverter;
 import com.community.idle.entity.PickupPoint;
 import com.community.idle.service.PickupPointService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,10 +16,13 @@ import java.util.List;
 @Tag(name = "自提点管理")
 @RestController
 @RequestMapping("/pickup-point")
-@RequiredArgsConstructor
 public class PickupPointController {
 
     private final PickupPointService pickupPointService;
+
+    public PickupPointController(PickupPointService pickupPointService) {
+        this.pickupPointService = pickupPointService;
+    }
 
     @Operation(summary = "新增自提点")
     @PostMapping
@@ -52,8 +55,9 @@ public class PickupPointController {
     @GetMapping("/page")
     public Result<PageResult<PickupPoint>> page(@ModelAttribute PageQuery query,
                                                 @RequestParam(required = false) String keyword,
-                                                @RequestParam(required = false) Integer status) {
-        return Result.success(pickupPointService.page(query, keyword, status));
+                                                @RequestParam(required = false) String status) {
+        Integer statusInt = StatusConverter.getPickupPointStatus(status);
+        return Result.success(pickupPointService.page(query, keyword, statusInt));
     }
 
     @Operation(summary = "获取所有启用的自提点")

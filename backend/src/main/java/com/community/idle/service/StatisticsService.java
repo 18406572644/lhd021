@@ -4,6 +4,7 @@ import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.entity.MonthlyStatistics;
 
+import java.util.List;
 import java.util.Map;
 
 public interface StatisticsService {
@@ -14,4 +15,6 @@ public interface StatisticsService {
     MonthlyStatistics getByMonth(String month);
     Map<String, Object> getDashboard();
     Map<String, Object> getTrendData(Integer months);
+    List<Map<String, Object>> getCategoryStats();
+    Map<String, Object> getCreditDistribution();
 }

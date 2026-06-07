@@ -3,13 +3,13 @@ package com.community.idle.controller;
 import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
+import com.community.idle.common.StatusConverter;
 import com.community.idle.dto.ExchangeApplyDTO;
 import com.community.idle.entity.ExchangeApply;
 import com.community.idle.service.ExchangeApplyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -17,10 +17,13 @@ import java.util.Map;
 @Tag(name = "互换申请管理")
 @RestController
 @RequestMapping("/exchange-apply")
-@RequiredArgsConstructor
 public class ExchangeApplyController {
 
     private final ExchangeApplyService exchangeApplyService;
+
+    public ExchangeApplyController(ExchangeApplyService exchangeApplyService) {
+        this.exchangeApplyService = exchangeApplyService;
+    }
 
     @Operation(summary = "提交互换申请")
     @PostMapping
@@ -60,23 +63,26 @@ public class ExchangeApplyController {
     @Operation(summary = "分页查询申请列表（管理员）")
     @GetMapping("/page")
     public Result<PageResult<ExchangeApply>> page(@ModelAttribute PageQuery query,
-                                                  @RequestParam(required = false) Integer status,
+                                                  @RequestParam(required = false) String status,
                                                   @RequestParam(required = false) String keyword) {
-        return Result.success(exchangeApplyService.page(query, status, keyword));
+        Integer statusInt = StatusConverter.getExchangeStatus(status);
+        return Result.success(exchangeApplyService.page(query, statusInt, keyword));
     }
 
     @Operation(summary = "我发起的申请")
     @GetMapping("/my-apply")
     public Result<PageResult<ExchangeApply>> myApply(@ModelAttribute PageQuery query,
-                                                     @RequestParam(required = false) Integer status) {
-        return Result.success(exchangeApplyService.myApply(query, status));
+                                                     @RequestParam(required = false) String status) {
+        Integer statusInt = StatusConverter.getExchangeStatus(status);
+        return Result.success(exchangeApplyService.myApply(query, statusInt));
     }
 
     @Operation(summary = "我收到的申请")
     @GetMapping("/my-receive")
     public Result<PageResult<ExchangeApply>> myReceive(@ModelAttribute PageQuery query,
-                                                       @RequestParam(required = false) Integer status) {
-        return Result.success(exchangeApplyService.myReceive(query, status));
+                                                       @RequestParam(required = false) String status) {
+        Integer statusInt = StatusConverter.getExchangeStatus(status);
+        return Result.success(exchangeApplyService.myReceive(query, statusInt));
     }
 
     @Operation(summary = "申请详情")
