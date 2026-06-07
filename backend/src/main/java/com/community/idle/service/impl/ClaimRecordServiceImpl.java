@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.community.idle.common.*;
+import com.community.idle.common.annotation.DataScope;
 import com.community.idle.dto.ClaimRecordDTO;
 import com.community.idle.entity.ClaimRecord;
 import com.community.idle.entity.IdleItem;
