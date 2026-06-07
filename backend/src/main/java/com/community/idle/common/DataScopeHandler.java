@@ -2,18 +2,6 @@ package com.community.idle.common;
 
 import com.baomidou.mybatisplus.core.toolkit.PluginUtils;
 import com.community.idle.common.aspect.DataScopeAspect;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.Parenthesis;
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.parser.CCJSqlParserUtil;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.plugin.*;
@@ -55,62 +43,93 @@ public class DataScopeHandler implements Interceptor {
 
     private String buildDataScopeSql(String originalSql, DataScopeAspect.DataScopeContext context) {
         try {
-            Select select = (Select) CCJSqlParserUtil.parse(originalSql);
-            PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
-
-            List<Expression> conditions = new ArrayList<>();
-
             Integer dataScopeType = context.getDataScopeType();
             Long userId = context.getUserId();
 
+            List<String> conditions = new ArrayList<>();
+
             if (dataScopeType == 4) {
                 if (context.isUserScope()) {
-                    EqualsTo equalsTo = new EqualsTo();
-                    equalsTo.setLeftExpression(new Column(buildColumnName(context.getTableAlias(), context.getUserColumnName())));
-                    equalsTo.setRightExpression(new LongValue(userId));
-                    conditions.add(equalsTo);
+                    String columnName = buildColumnName(context.getTableAlias(), context.getUserColumnName());
+                    conditions.add(columnName + " = " + userId);
                 }
             } else if (dataScopeType == 5) {
                 Set<Long> businessIds = context.getBusinessIds();
                 if (businessIds != null && !businessIds.isEmpty()) {
-                    InExpression inExpression = new InExpression();
-                    inExpression.setLeftExpression(new Column(buildColumnName(context.getTableAlias(), context.getColumnName())));
-                    ExpressionList expressionList = new ExpressionList();
-                    List<Expression> expressions = new ArrayList<>();
-                    for (Long id : businessIds) {
-                        expressions.add(new LongValue(id));
-                    }
-                    expressionList.setExpressions(expressions);
-                    inExpression.setRightExpression(expressionList);
-                    conditions.add(inExpression);
+                    String columnName = buildColumnName(context.getTableAlias(), context.getColumnName());
+                    String ids = String.join(",", businessIds.stream().map(String::valueOf).toList());
+                    conditions.add(columnName + " IN (" + ids + ")");
                 } else if (context.isUserScope()) {
-                    EqualsTo equalsTo = new EqualsTo();
-                    equalsTo.setLeftExpression(new Column(buildColumnName(context.getTableAlias(), context.getUserColumnName())));
-                    equalsTo.setRightExpression(new LongValue(userId));
-                    conditions.add(equalsTo);
+                    String columnName = buildColumnName(context.getTableAlias(), context.getUserColumnName());
+                    conditions.add(columnName + " = " + userId);
                 }
             }
 
-            if (!conditions.isEmpty()) {
-                Expression where = plainSelect.getWhere();
-                Expression expression = conditions.get(0);
-                for (int i = 1; i < conditions.size(); i++) {
-                    expression = new AndExpression(expression, conditions.get(i));
-                }
-                Parenthesis parenthesis = new Parenthesis(expression);
-
-                if (where == null) {
-                    plainSelect.setWhere(parenthesis);
-                } else {
-                    plainSelect.setWhere(new AndExpression(where, parenthesis));
-                }
+            if (conditions.isEmpty()) {
+                return null;
             }
 
-            return select.toString();
-        } catch (JSQLParserException e) {
-            log.error("解析SQL失败", e);
+            String dataScopeCondition = String.join(" AND ", conditions);
+            return addWhereCondition(originalSql, dataScopeCondition);
+        } catch (Exception e) {
+            log.error("构建数据权限SQL失败", e);
             return null;
         }
+    }
+
+    private String addWhereCondition(String originalSql, String condition) {
+        String upperSql = originalSql.toUpperCase().trim();
+        
+        int whereIndex = upperSql.indexOf(" WHERE ");
+        int orderByIndex = upperSql.indexOf(" ORDER BY ");
+        int limitIndex = upperSql.indexOf(" LIMIT ");
+        int groupByIndex = upperSql.indexOf(" GROUP BY ");
+        int havingIndex = upperSql.indexOf(" HAVING ");
+
+        int insertPosition;
+        String insertClause;
+
+        if (whereIndex > 0) {
+            insertPosition = whereIndex + " WHERE ".length();
+            insertClause = "(" + condition + ") AND ";
+        } else {
+            int endOfFrom = findEndOfFrom(upperSql);
+            if (endOfFrom < 0) {
+                return originalSql;
+            }
+            insertPosition = endOfFrom;
+            insertClause = " WHERE (" + condition + ")";
+        }
+
+        StringBuilder sb = new StringBuilder(originalSql);
+        sb.insert(insertPosition, insertClause);
+        return sb.toString();
+    }
+
+    private int findEndOfFrom(String upperSql) {
+        int fromIndex = upperSql.indexOf(" FROM ");
+        if (fromIndex < 0) {
+            return -1;
+        }
+
+        int searchPos = fromIndex + " FROM ".length();
+        
+        int orderByIndex = upperSql.indexOf(" ORDER BY ", searchPos);
+        int limitIndex = upperSql.indexOf(" LIMIT ", searchPos);
+        int groupByIndex = upperSql.indexOf(" GROUP BY ", searchPos);
+        int whereIndex = upperSql.indexOf(" WHERE ", searchPos);
+
+        List<Integer> positions = new ArrayList<>();
+        if (orderByIndex > 0) positions.add(orderByIndex);
+        if (limitIndex > 0) positions.add(limitIndex);
+        if (groupByIndex > 0) positions.add(groupByIndex);
+        if (whereIndex > 0) positions.add(whereIndex);
+
+        if (positions.isEmpty()) {
+            return upperSql.length();
+        }
+
+        return Collections.min(positions);
     }
 
     private String buildColumnName(String tableAlias, String columnName) {

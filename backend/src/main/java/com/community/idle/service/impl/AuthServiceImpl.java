@@ -9,9 +9,11 @@ import com.community.idle.common.annotation.DataScope;
 import com.community.idle.dto.AssignRoleDTO;
 import com.community.idle.dto.LoginDTO;
 import com.community.idle.dto.RegisterDTO;
+import com.community.idle.entity.Permission;
 import com.community.idle.entity.Role;
 import com.community.idle.entity.User;
 import com.community.idle.entity.UserRole;
+import com.community.idle.mapper.PermissionMapper;
 import com.community.idle.mapper.RoleMapper;
 import com.community.idle.mapper.UserMapper;
 import com.community.idle.mapper.UserRoleMapper;
@@ -31,14 +33,14 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtils jwtUtils;
     private final RoleMapper roleMapper;
     private final UserRoleMapper userRoleMapper;
-    private final RoleMapper rolePermissionMapper;
+    private final PermissionMapper permissionMapper;
 
-    public AuthServiceImpl(UserMapper userMapper, JwtUtils jwtUtils, RoleMapper roleMapper, UserRoleMapper userRoleMapper, RoleMapper rolePermissionMapper) {
+    public AuthServiceImpl(UserMapper userMapper, JwtUtils jwtUtils, RoleMapper roleMapper, UserRoleMapper userRoleMapper, PermissionMapper permissionMapper) {
         this.userMapper = userMapper;
         this.jwtUtils = jwtUtils;
         this.roleMapper = roleMapper;
         this.userRoleMapper = userRoleMapper;
-        this.rolePermissionMapper = rolePermissionMapper;
+        this.permissionMapper = permissionMapper;
     }
 
     @Override
@@ -60,11 +62,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         List<Role> roles = roleMapper.selectRolesByUserId(user.getId());
-        String roleCodes = roles.stream()
+        String roleCodesStr = roles.stream()
                 .map(Role::getRoleCode)
                 .collect(Collectors.joining(","));
 
-        String token = jwtUtils.generateToken(user.getId(), user.getUsername(), user.getDeptId(), roleCodes);
+        String token = jwtUtils.generateToken(user.getId(), user.getUsername(), user.getDeptId(), roleCodesStr);
 
         List<String> roleNames = roles.stream()
                 .map(Role::getRoleName)
@@ -72,16 +74,53 @@ public class AuthServiceImpl implements AuthService {
         user.setRoleNames(roleNames);
         user.setRoleIds(roles.stream().map(Role::getId).collect(Collectors.toList()));
 
+        List<String> roleCodes = roles.stream()
+                .map(Role::getRoleCode)
+                .collect(Collectors.toList());
+        List<String> permissions = loadUserPermissions(user.getId());
+        List<Permission> menuTree = buildMenuTree(user.getId());
+
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
         result.put("user", EntityConverter.convertUser(user));
-        result.put("roles", roles);
-        result.put("permissions", loadUserPermissions(user.getId()));
+        result.put("roles", roleCodes);
+        result.put("permissions", permissions);
+        result.put("menuTree", menuTree);
         return result;
     }
 
     private List<String> loadUserPermissions(Long userId) {
-        return new ArrayList<>();
+        return permissionMapper.selectPermissionCodesByUserId(userId);
+    }
+
+    private List<Permission> buildMenuTree(Long userId) {
+        List<Permission> allPermissions = permissionMapper.selectPermissionsByUserId(userId);
+        List<Permission> menuPermissions = allPermissions.stream()
+                .filter(p -> p.getPermissionType() != null && p.getPermissionType() == 1)
+                .sorted(Comparator.comparing(Permission::getSortOrder))
+                .collect(Collectors.toList());
+
+        Map<Long, Permission> permissionMap = new HashMap<>();
+        for (Permission p : menuPermissions) {
+            permissionMap.put(p.getId(), p);
+        }
+
+        List<Permission> rootMenus = new ArrayList<>();
+        for (Permission p : menuPermissions) {
+            if (p.getParentId() == null || p.getParentId() == 0) {
+                rootMenus.add(p);
+            } else {
+                Permission parent = permissionMap.get(p.getParentId());
+                if (parent != null) {
+                    if (parent.getChildren() == null) {
+                        parent.setChildren(new ArrayList<>());
+                    }
+                    parent.getChildren().add(p);
+                    parent.getChildren().sort(Comparator.comparing(Permission::getSortOrder));
+                }
+            }
+        }
+        return rootMenus;
     }
 
     @Override
