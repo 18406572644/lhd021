@@ -4,6 +4,7 @@ import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
 import com.community.idle.common.StatusConverter;
+import com.community.idle.common.annotation.RequirePermission;
 import com.community.idle.dto.IdleItemDTO;
 import com.community.idle.entity.IdleItem;
 import com.community.idle.service.IdleItemService;
@@ -27,6 +28,7 @@ public class IdleItemController {
 
     @Operation(summary = "发布闲置物品")
     @PostMapping
+    @RequirePermission("idle_item_add")
     public Result<Void> publish(@Valid @RequestBody IdleItemDTO dto) {
         idleItemService.publish(dto);
         return Result.success();
@@ -34,6 +36,7 @@ public class IdleItemController {
 
     @Operation(summary = "更新闲置物品")
     @PutMapping("/{id}")
+    @RequirePermission("idle_item_edit")
     public Result<Void> update(@PathVariable Long id, @Valid @RequestBody IdleItemDTO dto) {
         idleItemService.update(id, dto);
         return Result.success();
@@ -41,6 +44,7 @@ public class IdleItemController {
 
     @Operation(summary = "分页查询闲置物品")
     @GetMapping("/page")
+    @RequirePermission("idle_item_list")
     public Result<PageResult<IdleItem>> page(@ModelAttribute PageQuery query,
                                              @RequestParam(required = false) String keyword,
                                              @RequestParam(required = false) String category,

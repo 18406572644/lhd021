@@ -90,6 +90,26 @@ export const statisticsApi = {
   getHistory: () => request.get('/statistics/page', { params: { pageNum: 1, pageSize: 12 } })
 }
 
+export const systemApi = {
+  getMenuTree: () => request.get('/system/menu/tree'),
+  getPermissionTree: () => request.get('/system/permission/tree'),
+  getPermissionList: () => request.get('/system/permission/list'),
+  addPermission: (data) => request.post('/system/permission', data),
+  updatePermission: (data) => request.put('/system/permission', data),
+  deletePermission: (id) => request.delete(`/system/permission/${id}`),
+  
+  getRolePage: (params) => request.get('/system/role/page', { params }),
+  getRoleList: () => request.get('/system/role/list'),
+  getRoleDetail: (id) => request.get(`/system/role/${id}`),
+  addRole: (data) => request.post('/system/role', data),
+  updateRole: (data) => request.put('/system/role', data),
+  deleteRole: (id) => request.delete(`/system/role/${id}`),
+  assignPermissions: (roleId, permissionIds) => request.post(`/system/role/${roleId}/permissions`, permissionIds),
+  assignDataPermissions: (roleId, data) => request.post(`/system/role/${roleId}/data-permissions`, data),
+  getUserRoles: (userId) => request.get(`/system/user/${userId}/roles`),
+  assignUserRoles: (userId, roleIds) => request.post(`/system/user/${userId}/roles`, roleIds)
+}
+
 export const api = {
   auth: authApi,
   idleItem: idleItemApi,
@@ -98,5 +118,6 @@ export const api = {
   claimRecord: claimRecordApi,
   creditRating: creditRatingApi,
   itemArchive: itemArchiveApi,
-  statistics: statisticsApi
+  statistics: statisticsApi,
+  system: systemApi
 }

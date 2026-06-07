@@ -149,6 +149,7 @@ public class ClaimRecordServiceImpl implements ClaimRecordService {
     }
 
     @Override
+    @DataScope(businessType = "PICKUP_POINT", tableAlias = "", columnName = "pickup_point_id", userScope = true, userColumnName = "claim_user_id")
     public PageResult<ClaimRecord> page(PageQuery query, Integer pickupStatus, String keyword) {
         LambdaQueryWrapper<ClaimRecord> wrapper = new LambdaQueryWrapper<>();
         if (pickupStatus != null) {

@@ -1,8 +1,11 @@
 package com.community.idle.controller;
 
 import com.community.idle.common.Result;
+import com.community.idle.common.annotation.RequirePermission;
+import com.community.idle.dto.AssignRoleDTO;
 import com.community.idle.dto.LoginDTO;
 import com.community.idle.dto.RegisterDTO;
+import com.community.idle.entity.Role;
 import com.community.idle.entity.User;
 import com.community.idle.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,8 +48,25 @@ public class AuthController {
 
     @Operation(summary = "获取所有用户列表")
     @GetMapping("/users")
+    @RequirePermission("system_user_list")
     public Result<List<User>> listUsers() {
         return Result.success(authService.listAllUsers());
+    }
+
+    @Operation(summary = "为用户分配角色")
+    @PostMapping("/user/{userId}/roles")
+    @RequirePermission("system_user_assign_role")
+    public Result<Void> assignRoles(@PathVariable Long userId, @Valid @RequestBody AssignRoleDTO dto) {
+        dto.setUserId(userId);
+        authService.assignRoles(dto);
+        return Result.success();
+    }
+
+    @Operation(summary = "获取用户角色列表")
+    @GetMapping("/user/{userId}/roles")
+    @RequirePermission("system_user_list")
+    public Result<List<Role>> getUserRoles(@PathVariable Long userId) {
+        return Result.success(authService.getUserRoles(userId));
     }
 
     @Operation(summary = "用户登出")

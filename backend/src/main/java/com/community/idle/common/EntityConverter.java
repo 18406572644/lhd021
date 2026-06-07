@@ -12,7 +12,6 @@ public class EntityConverter {
         if (user == null) return null;
         user.setPublishCount(user.getReleaseCount() != null ? user.getReleaseCount() : 0);
         user.setClaimCount(0);
-        user.setRoleName(StatusConverter.getRoleName(user.getRole()));
         user.setStatusName(StatusConverter.getUserStatus(user.getStatus()));
         if (user.getNickname() == null || user.getNickname().isEmpty()) {
             user.setNickname(user.getUsername());

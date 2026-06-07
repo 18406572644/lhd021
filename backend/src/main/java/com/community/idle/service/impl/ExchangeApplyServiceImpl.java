@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.community.idle.common.*;
+import com.community.idle.common.annotation.DataScope;
 import com.community.idle.dto.ExchangeApplyDTO;
 import com.community.idle.entity.ExchangeApply;
 import com.community.idle.entity.IdleItem;
@@ -205,6 +206,7 @@ public class ExchangeApplyServiceImpl implements ExchangeApplyService {
     }
 
     @Override
+    @DataScope(userScope = true, userColumnName = "applicant_id")
     public PageResult<ExchangeApply> page(PageQuery query, Integer status, String keyword) {
         LambdaQueryWrapper<ExchangeApply> wrapper = new LambdaQueryWrapper<>();
         if (status != null) {

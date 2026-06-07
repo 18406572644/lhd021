@@ -4,6 +4,7 @@ import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
 import com.community.idle.common.StatusConverter;
+import com.community.idle.common.annotation.RequirePermission;
 import com.community.idle.dto.ExchangeApplyDTO;
 import com.community.idle.entity.ExchangeApply;
 import com.community.idle.service.ExchangeApplyService;
@@ -62,6 +63,7 @@ public class ExchangeApplyController {
 
     @Operation(summary = "分页查询申请列表（管理员）")
     @GetMapping("/page")
+    @RequirePermission("exchange_apply_list")
     public Result<PageResult<ExchangeApply>> page(@ModelAttribute PageQuery query,
                                                   @RequestParam(required = false) String status,
                                                   @RequestParam(required = false) String keyword) {

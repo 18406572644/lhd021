@@ -276,3 +276,167 @@ INSERT INTO monthly_statistics (statistics_month, new_user_count, active_user_co
 ('2024-01', 12, 45, 28, 18, 12, 66.67, 15, 5, 12580.00, 8, 2, 4, '一月份运营数据'),
 ('2023-12', 8, 38, 22, 15, 9, 60.00, 11, 3, 9860.00, 5, 1, 4, '十二月份运营数据'),
 ('2023-11', 15, 52, 35, 22, 16, 72.73, 18, 7, 15680.00, 10, 3, 3, '十一月份运营数据');
+
+DROP TABLE IF EXISTS sys_role;
+CREATE TABLE sys_role (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '角色ID',
+    role_code VARCHAR(50) NOT NULL COMMENT '角色编码',
+    role_name VARCHAR(50) NOT NULL COMMENT '角色名称',
+    role_desc VARCHAR(200) COMMENT '角色描述',
+    status TINYINT DEFAULT 1 COMMENT '状态：0-禁用 1-启用',
+    data_scope TINYINT DEFAULT 1 COMMENT '数据权限范围：1-全部 2-本部门及以下 3-本部门 4-本人 5-自定义',
+    sort_order INT DEFAULT 0 COMMENT '排序',
+    create_time DATETIME COMMENT '创建时间',
+    update_time DATETIME COMMENT '更新时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_role_code (role_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色表';
+
+DROP TABLE IF EXISTS sys_permission;
+CREATE TABLE sys_permission (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT '权限ID',
+    permission_code VARCHAR(100) NOT NULL COMMENT '权限编码',
+    permission_name VARCHAR(100) NOT NULL COMMENT '权限名称',
+    permission_type TINYINT NOT NULL COMMENT '权限类型：1-菜单 2-按钮 3-接口',
+    parent_id BIGINT DEFAULT 0 COMMENT '父级ID',
+    path VARCHAR(200) COMMENT '路由路径',
+    component VARCHAR(200) COMMENT '组件路径',
+    icon VARCHAR(50) COMMENT '图标',
+    sort_order INT DEFAULT 0 COMMENT '排序',
+    visible TINYINT DEFAULT 1 COMMENT '是否显示：0-隐藏 1-显示',
+    status TINYINT DEFAULT 1 COMMENT '状态：0-禁用 1-启用',
+    api_method VARCHAR(10) COMMENT '请求方式：GET/POST/PUT/DELETE',
+    api_path VARCHAR(200) COMMENT '接口路径',
+    create_time DATETIME COMMENT '创建时间',
+    update_time DATETIME COMMENT '更新时间',
+    deleted TINYINT DEFAULT 0 COMMENT '逻辑删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_permission_code (permission_code),
+    KEY idx_parent_id (parent_id),
+    KEY idx_permission_type (permission_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='权限表';
+
+DROP TABLE IF EXISTS sys_user_role;
+CREATE TABLE sys_user_role (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    user_id BIGINT NOT NULL COMMENT '用户ID',
+    role_id BIGINT NOT NULL COMMENT '角色ID',
+    create_time DATETIME COMMENT '创建时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_user_role (user_id, role_id),
+    KEY idx_user_id (user_id),
+    KEY idx_role_id (role_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户角色关联表';
+
+DROP TABLE IF EXISTS sys_role_permission;
+CREATE TABLE sys_role_permission (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    role_id BIGINT NOT NULL COMMENT '角色ID',
+    permission_id BIGINT NOT NULL COMMENT '权限ID',
+    create_time DATETIME COMMENT '创建时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_role_permission (role_id, permission_id),
+    KEY idx_role_id (role_id),
+    KEY idx_permission_id (permission_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='角色权限关联表';
+
+DROP TABLE IF EXISTS sys_data_permission;
+CREATE TABLE sys_data_permission (
+    id BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    role_id BIGINT NOT NULL COMMENT '角色ID',
+    business_type VARCHAR(50) NOT NULL COMMENT '业务类型：PICKUP_POINT-自提点 USER-用户',
+    business_id BIGINT NOT NULL COMMENT '业务ID',
+    create_time DATETIME COMMENT '创建时间',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_role_business (role_id, business_type, business_id),
+    KEY idx_role_id (role_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='数据权限表';
+
+ALTER TABLE sys_user DROP COLUMN role;
+ALTER TABLE sys_user ADD COLUMN dept_id BIGINT COMMENT '部门ID' AFTER avatar;
+
+INSERT INTO sys_role (role_code, role_name, role_desc, status, data_scope, sort_order) VALUES
+('SUPER_ADMIN', '超级管理员', '拥有系统所有权限', 1, 1, 1),
+('OPERATOR', '运营专员', '负责日常运营管理', 1, 1, 2),
+('AUDITOR', '审核专员', '负责互换申请审核', 1, 1, 3),
+('PICKUP_ADMIN', '自提点管理员', '负责自提点管理', 1, 5, 4),
+('NORMAL_USER', '普通用户', '普通注册用户', 1, 4, 5);
+
+INSERT INTO sys_permission (permission_code, permission_name, permission_type, parent_id, path, component, icon, sort_order, visible, status, api_method, api_path) VALUES
+('dashboard', '仪表盘', 1, 0, 'dashboard', 'dashboard/index', 'Odometer', 1, 1, 1, NULL, NULL),
+('idle_item', '闲置物品', 1, 0, 'idle-item', 'idle-item/index', 'Goods', 2, 1, 1, NULL, NULL),
+('idle_item_list', '物品列表', 2, 2, NULL, NULL, NULL, 1, 1, 1, 'GET', '/idle-item/page'),
+('idle_item_add', '发布物品', 2, 2, NULL, NULL, 'Plus', 2, 1, 1, 'POST', '/idle-item'),
+('idle_item_edit', '编辑物品', 2, 2, NULL, NULL, 'Edit', 3, 1, 1, 'PUT', '/idle-item'),
+('idle_item_delete', '删除物品', 2, 2, NULL, NULL, 'Delete', 4, 1, 1, 'DELETE', '/idle-item/*'),
+('exchange_apply', '互换申请', 1, 0, 'exchange-apply', 'exchange-apply/index', 'RefreshRight', 3, 1, 1, NULL, NULL),
+('exchange_apply_list', '申请列表', 2, 7, NULL, NULL, NULL, 1, 1, 1, 'GET', '/exchange-apply/page'),
+('exchange_apply_audit', '审核申请', 2, 7, NULL, NULL, 'Check', 2, 1, 1, 'POST', '/exchange-apply/*/audit'),
+('pickup_point', '自提点管理', 1, 0, 'pickup-point', 'pickup-point/index', 'Location', 4, 1, 1, NULL, NULL),
+('pickup_point_list', '自提点列表', 2, 10, NULL, NULL, NULL, 1, 1, 1, 'GET', '/pickup-point/page'),
+('pickup_point_add', '新增自提点', 2, 10, NULL, NULL, 'Plus', 2, 1, 1, 'POST', '/pickup-point'),
+('pickup_point_edit', '编辑自提点', 2, 10, NULL, NULL, 'Edit', 3, 1, 1, 'PUT', '/pickup-point'),
+('pickup_point_delete', '删除自提点', 2, 10, NULL, NULL, 'Delete', 4, 1, 1, 'DELETE', '/pickup-point/*'),
+('claim_record', '领用记录', 1, 0, 'claim-record', 'claim-record/index', 'Document', 5, 1, 1, NULL, NULL),
+('claim_record_list', '领用列表', 2, 15, NULL, NULL, NULL, 1, 1, 1, 'GET', '/claim-record/page'),
+('claim_record_confirm', '确认领取', 2, 15, NULL, NULL, 'Check', 2, 1, 1, 'POST', '/claim-record/*/confirm'),
+('credit_rating', '信用评级', 1, 0, 'credit-rating', 'credit-rating/index', 'Medal', 6, 1, 1, NULL, NULL),
+('credit_rating_list', '评级记录', 2, 18, NULL, NULL, NULL, 1, 1, 1, 'GET', '/credit-rating/page'),
+('credit_rating_adjust', '信用调整', 2, 18, NULL, NULL, 'Edit', 2, 1, 1, 'POST', '/credit-rating/adjust'),
+('item_archive', '归档管理', 1, 0, 'item-archive', 'item-archive/index', 'Folder', 7, 1, 1, NULL, NULL),
+('item_archive_list', '归档列表', 2, 21, NULL, NULL, NULL, 1, 1, 1, 'GET', '/item-archive/page'),
+('statistics', '数据统计', 1, 0, 'statistics', 'statistics/index', 'DataLine', 8, 1, 1, NULL, NULL),
+('statistics_view', '查看统计', 2, 23, NULL, NULL, NULL, 1, 1, 1, 'GET', '/statistics/**'),
+('system', '系统管理', 1, 0, 'system', NULL, 'Setting', 9, 1, 1, NULL, NULL),
+('system_user', '用户管理', 1, 25, 'user', 'system/user/index', 'User', 1, 1, 1, NULL, NULL),
+('system_user_list', '用户列表', 2, 26, NULL, NULL, NULL, 1, 1, 1, 'GET', '/auth/users'),
+('system_user_edit', '编辑用户', 2, 26, NULL, NULL, 'Edit', 2, 1, 1, 'PUT', '/auth/user/*'),
+('system_user_assign_role', '分配角色', 2, 26, NULL, NULL, 'UserFilled', 3, 1, 1, 'POST', '/auth/user/*/roles'),
+('system_role', '角色管理', 1, 25, 'role', 'system/role/index', 'Avatar', 2, 1, 1, NULL, NULL),
+('system_role_list', '角色列表', 2, 29, NULL, NULL, NULL, 1, 1, 1, 'GET', '/system/role/page'),
+('system_role_add', '新增角色', 2, 29, NULL, NULL, 'Plus', 2, 1, 1, 'POST', '/system/role'),
+('system_role_edit', '编辑角色', 2, 29, NULL, NULL, 'Edit', 3, 1, 1, 'PUT', '/system/role'),
+('system_role_delete', '删除角色', 2, 29, NULL, NULL, 'Delete', 4, 1, 1, 'DELETE', '/system/role/*'),
+('system_role_assign_permission', '分配权限', 2, 29, NULL, NULL, 'Key', 5, 1, 1, 'POST', '/system/role/*/permissions'),
+('system_permission', '权限管理', 1, 25, 'permission', 'system/permission/index', 'Key', 3, 1, 1, NULL, NULL),
+('system_permission_list', '权限列表', 2, 34, NULL, NULL, NULL, 1, 1, 1, 'GET', '/system/permission/list'),
+('system_permission_add', '新增权限', 2, 34, NULL, NULL, 'Plus', 2, 1, 1, 'POST', '/system/permission'),
+('system_permission_edit', '编辑权限', 2, 34, NULL, NULL, 'Edit', 3, 1, 1, 'PUT', '/system/permission'),
+('system_permission_delete', '删除权限', 2, 34, NULL, NULL, 'Delete', 4, 1, 1, 'DELETE', '/system/permission/*');
+
+INSERT INTO sys_user_role (user_id, role_id, create_time) VALUES
+(1, 1, NOW()),
+(2, 5, NOW()),
+(3, 5, NOW()),
+(4, 5, NOW()),
+(5, 5, NOW());
+
+INSERT INTO sys_role_permission (role_id, permission_id, create_time) VALUES
+(1, 1, NOW()), (1, 2, NOW()), (1, 3, NOW()), (1, 4, NOW()), (1, 5, NOW()), (1, 6, NOW()),
+(1, 7, NOW()), (1, 8, NOW()), (1, 9, NOW()), (1, 10, NOW()), (1, 11, NOW()), (1, 12, NOW()),
+(1, 13, NOW()), (1, 14, NOW()), (1, 15, NOW()), (1, 16, NOW()), (1, 17, NOW()), (1, 18, NOW()),
+(1, 19, NOW()), (1, 20, NOW()), (1, 21, NOW()), (1, 22, NOW()), (1, 23, NOW()), (1, 24, NOW()),
+(1, 25, NOW()), (1, 26, NOW()), (1, 27, NOW()), (1, 28, NOW()), (1, 29, NOW()), (1, 30, NOW()),
+(1, 31, NOW()), (1, 32, NOW()), (1, 33, NOW()), (1, 34, NOW()), (1, 35, NOW()), (1, 36, NOW()),
+(1, 37, NOW()), (1, 38, NOW()),
+(2, 1, NOW()), (2, 2, NOW()), (2, 3, NOW()), (2, 4, NOW()), (2, 5, NOW()), (2, 6, NOW()),
+(2, 7, NOW()), (2, 8, NOW()), (2, 9, NOW()), (2, 10, NOW()), (2, 11, NOW()), (2, 12, NOW()),
+(2, 13, NOW()), (2, 14, NOW()), (2, 15, NOW()), (2, 16, NOW()), (2, 18, NOW()), (2, 19, NOW()),
+(2, 21, NOW()), (2, 22, NOW()), (2, 23, NOW()), (2, 24, NOW()),
+(3, 1, NOW()), (3, 7, NOW()), (3, 8, NOW()), (3, 9, NOW()), (3, 15, NOW()), (3, 16, NOW()),
+(3, 17, NOW()), (3, 18, NOW()), (3, 19, NOW()),
+(4, 1, NOW()), (4, 10, NOW()), (4, 11, NOW()), (4, 13, NOW()), (4, 15, NOW()), (4, 16, NOW()),
+(4, 17, NOW()),
+(5, 1, NOW()), (5, 2, NOW()), (5, 3, NOW()), (5, 4, NOW()), (5, 7, NOW()), (5, 8, NOW()),
+(5, 10, NOW()), (5, 11, NOW()), (5, 15, NOW()), (5, 16, NOW()), (5, 18, NOW()), (5, 19, NOW());
+
+INSERT INTO sys_data_permission (role_id, business_type, business_id, create_time) VALUES
+(4, 'PICKUP_POINT', 1, NOW()),
+(4, 'PICKUP_POINT', 2, NOW());
+
+UPDATE sys_user SET dept_id = 1 WHERE id = 1;
+UPDATE sys_user SET dept_id = 2 WHERE id = 2;
+UPDATE sys_user SET dept_id = 2 WHERE id = 3;
+UPDATE sys_user SET dept_id = 3 WHERE id = 4;
+UPDATE sys_user SET dept_id = 3 WHERE id = 5;

@@ -4,6 +4,7 @@ import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
 import com.community.idle.common.StatusConverter;
+import com.community.idle.common.annotation.RequirePermission;
 import com.community.idle.dto.ClaimRecordDTO;
 import com.community.idle.entity.ClaimRecord;
 import com.community.idle.service.ClaimRecordService;

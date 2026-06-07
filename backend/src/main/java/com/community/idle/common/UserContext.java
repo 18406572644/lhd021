@@ -1,5 +1,7 @@
 package com.community.idle.common;
 
+import java.util.*;
+
 public class UserContext {
 
     private static final ThreadLocal<CurrentUser> HOLDER = new ThreadLocal<>();
@@ -22,14 +24,33 @@ public class UserContext {
         return user != null ? user.getUsername() : null;
     }
 
-    public static Integer getRole() {
+    public static Long getDeptId() {
         CurrentUser user = HOLDER.get();
-        return user != null ? user.getRole() : null;
+        return user != null ? user.getDeptId() : null;
     }
 
     public static boolean isAdmin() {
         CurrentUser user = HOLDER.get();
-        return user != null && user.getRole() == 1;
+        return user != null && user.getRoleCodes() != null && user.getRoleCodes().contains("SUPER_ADMIN");
+    }
+
+    public static Set<String> getRoleCodes() {
+        CurrentUser user = HOLDER.get();
+        return user != null && user.getRoleCodes() != null ? user.getRoleCodes() : Collections.emptySet();
+    }
+
+    public static boolean hasRole(String roleCode) {
+        return getRoleCodes().contains(roleCode);
+    }
+
+    public static boolean hasAnyRole(String... roleCodes) {
+        Set<String> userRoles = getRoleCodes();
+        for (String roleCode : roleCodes) {
+            if (userRoles.contains(roleCode)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void remove() {
@@ -39,15 +60,18 @@ public class UserContext {
     public static class CurrentUser {
         private Long userId;
         private String username;
-        private Integer role;
+        private Long deptId;
+        private Set<String> roleCodes;
+        private Set<String> permissions;
 
         public CurrentUser() {
         }
 
-        public CurrentUser(Long userId, String username, Integer role) {
+        public CurrentUser(Long userId, String username, Long deptId, Set<String> roleCodes) {
             this.userId = userId;
             this.username = username;
-            this.role = role;
+            this.deptId = deptId;
+            this.roleCodes = roleCodes;
         }
 
         public Long getUserId() {
@@ -66,12 +90,28 @@ public class UserContext {
             this.username = username;
         }
 
-        public Integer getRole() {
-            return role;
+        public Long getDeptId() {
+            return deptId;
         }
 
-        public void setRole(Integer role) {
-            this.role = role;
+        public void setDeptId(Long deptId) {
+            this.deptId = deptId;
+        }
+
+        public Set<String> getRoleCodes() {
+            return roleCodes;
+        }
+
+        public void setRoleCodes(Set<String> roleCodes) {
+            this.roleCodes = roleCodes;
+        }
+
+        public Set<String> getPermissions() {
+            return permissions;
+        }
+
+        public void setPermissions(Set<String> permissions) {
+            this.permissions = permissions;
         }
     }
 }

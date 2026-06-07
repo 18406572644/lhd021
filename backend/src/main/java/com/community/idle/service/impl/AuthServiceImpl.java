@@ -4,33 +4,41 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.community.idle.common.BusinessException;
-import com.community.idle.common.EntityConverter;
-import com.community.idle.common.JwtUtils;
-import com.community.idle.common.ResultCode;
-import com.community.idle.common.UserContext;
+import com.community.idle.common.*;
+import com.community.idle.common.annotation.DataScope;
+import com.community.idle.dto.AssignRoleDTO;
 import com.community.idle.dto.LoginDTO;
 import com.community.idle.dto.RegisterDTO;
+import com.community.idle.entity.Role;
 import com.community.idle.entity.User;
+import com.community.idle.entity.UserRole;
+import com.community.idle.mapper.RoleMapper;
 import com.community.idle.mapper.UserMapper;
+import com.community.idle.mapper.UserRoleMapper;
 import com.community.idle.service.AuthService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
     private final UserMapper userMapper;
     private final JwtUtils jwtUtils;
+    private final RoleMapper roleMapper;
+    private final UserRoleMapper userRoleMapper;
+    private final RoleMapper rolePermissionMapper;
 
-    public AuthServiceImpl(UserMapper userMapper, JwtUtils jwtUtils) {
+    public AuthServiceImpl(UserMapper userMapper, JwtUtils jwtUtils, RoleMapper roleMapper, UserRoleMapper userRoleMapper, RoleMapper rolePermissionMapper) {
         this.userMapper = userMapper;
         this.jwtUtils = jwtUtils;
+        this.roleMapper = roleMapper;
+        this.userRoleMapper = userRoleMapper;
+        this.rolePermissionMapper = rolePermissionMapper;
     }
 
     @Override
@@ -50,11 +58,30 @@ public class AuthServiceImpl implements AuthService {
         if (user.getCreditScore().compareTo(new BigDecimal("60")) < 0) {
             throw new BusinessException(ResultCode.CREDIT_INSUFFICIENT);
         }
-        String token = jwtUtils.generateToken(user.getId(), user.getUsername(), user.getRole());
+
+        List<Role> roles = roleMapper.selectRolesByUserId(user.getId());
+        String roleCodes = roles.stream()
+                .map(Role::getRoleCode)
+                .collect(Collectors.joining(","));
+
+        String token = jwtUtils.generateToken(user.getId(), user.getUsername(), user.getDeptId(), roleCodes);
+
+        List<String> roleNames = roles.stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toList());
+        user.setRoleNames(roleNames);
+        user.setRoleIds(roles.stream().map(Role::getId).collect(Collectors.toList()));
+
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
         result.put("user", EntityConverter.convertUser(user));
+        result.put("roles", roles);
+        result.put("permissions", loadUserPermissions(user.getId()));
         return result;
+    }
+
+    private List<String> loadUserPermissions(Long userId) {
+        return new ArrayList<>();
     }
 
     @Override
@@ -71,13 +98,22 @@ public class AuthServiceImpl implements AuthService {
         user.setNickname(dto.getNickname());
         user.setPhone(dto.getPhone());
         user.setEmail(dto.getEmail());
-        user.setRole(0);
         user.setStatus(1);
         user.setCreditScore(new BigDecimal("100.00"));
         user.setCreditLevel("良好");
         user.setExchangeCount(0);
         user.setReleaseCount(0);
         userMapper.insert(user);
+
+        Role normalRole = roleMapper.selectOne(new LambdaQueryWrapper<Role>()
+                .eq(Role::getRoleCode, "NORMAL_USER"));
+        if (normalRole != null) {
+            UserRole userRole = new UserRole();
+            userRole.setUserId(user.getId());
+            userRole.setRoleId(normalRole.getId());
+            userRole.setCreateTime(LocalDateTime.now());
+            userRoleMapper.insert(userRole);
+        }
     }
 
     @Override
@@ -86,16 +122,63 @@ public class AuthServiceImpl implements AuthService {
         if (userId == null) {
             throw new BusinessException(ResultCode.UNAUTHORIZED);
         }
-        return EntityConverter.convertUser(userMapper.selectById(userId));
+        User user = userMapper.selectById(userId);
+        List<Role> roles = roleMapper.selectRolesByUserId(userId);
+        List<String> roleNames = roles.stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toList());
+        user.setRoleNames(roleNames);
+        user.setRoleIds(roles.stream().map(Role::getId).collect(Collectors.toList()));
+        return EntityConverter.convertUser(user);
     }
 
     @Override
+    @DataScope(businessType = "USER", tableAlias = "u", columnName = "dept_id", userScope = true, userColumnName = "id")
     public List<User> listAllUsers() {
-        return EntityConverter.convertUserList(userMapper.selectList(null));
+        List<User> users = userMapper.selectList(null);
+        for (User user : users) {
+            List<Role> roles = roleMapper.selectRolesByUserId(user.getId());
+            List<String> roleNames = roles.stream()
+                    .map(Role::getRoleName)
+                    .collect(Collectors.toList());
+            user.setRoleNames(roleNames);
+            user.setRoleIds(roles.stream().map(Role::getId).collect(Collectors.toList()));
+        }
+        return EntityConverter.convertUserList(users);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void assignRoles(AssignRoleDTO dto) {
+        User user = userMapper.selectById(dto.getUserId());
+        if (user == null) {
+            throw new BusinessException(ResultCode.USER_NOT_EXIST);
+        }
+
+        userRoleMapper.deleteByUserId(dto.getUserId());
+
+        if (dto.getRoleIds() != null && !dto.getRoleIds().isEmpty()) {
+            List<UserRole> userRoles = new ArrayList<>();
+            LocalDateTime now = LocalDateTime.now();
+            for (Long roleId : dto.getRoleIds()) {
+                UserRole userRole = new UserRole();
+                userRole.setUserId(dto.getUserId());
+                userRole.setRoleId(roleId);
+                userRole.setCreateTime(now);
+                userRoles.add(userRole);
+            }
+            userRoleMapper.batchInsert(userRoles);
+        }
+    }
+
+    @Override
+    public List<Role> getUserRoles(Long userId) {
+        return roleMapper.selectRolesByUserId(userId);
     }
 
     @Override
     public void logout() {
         UserContext.remove();
+        PermissionContext.clear();
     }
 }

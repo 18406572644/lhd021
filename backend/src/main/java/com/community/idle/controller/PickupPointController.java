@@ -4,6 +4,7 @@ import com.community.idle.common.PageQuery;
 import com.community.idle.common.PageResult;
 import com.community.idle.common.Result;
 import com.community.idle.common.StatusConverter;
+import com.community.idle.common.annotation.RequirePermission;
 import com.community.idle.entity.PickupPoint;
 import com.community.idle.service.PickupPointService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +27,7 @@ public class PickupPointController {
 
     @Operation(summary = "新增自提点")
     @PostMapping
+    @RequirePermission("pickup_point_add")
     public Result<Void> add(@Valid @RequestBody PickupPoint pickupPoint) {
         pickupPointService.add(pickupPoint);
         return Result.success();
@@ -33,6 +35,7 @@ public class PickupPointController {
 
     @Operation(summary = "更新自提点")
     @PutMapping
+    @RequirePermission("pickup_point_edit")
     public Result<Void> update(@Valid @RequestBody PickupPoint pickupPoint) {
         pickupPointService.update(pickupPoint);
         return Result.success();
@@ -40,6 +43,7 @@ public class PickupPointController {
 
     @Operation(summary = "删除自提点")
     @DeleteMapping("/{id}")
+    @RequirePermission("pickup_point_delete")
     public Result<Void> delete(@PathVariable Long id) {
         pickupPointService.delete(id);
         return Result.success();
@@ -53,6 +57,7 @@ public class PickupPointController {
 
     @Operation(summary = "分页查询自提点")
     @GetMapping("/page")
+    @RequirePermission("pickup_point_list")
     public Result<PageResult<PickupPoint>> page(@ModelAttribute PageQuery query,
                                                 @RequestParam(required = false) String keyword,
                                                 @RequestParam(required = false) String status) {

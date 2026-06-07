@@ -127,8 +127,37 @@ public class StatusConverter {
         return type;
     }
 
-    public static String getRoleName(Integer role) {
-        if (role == null) return "普通用户";
-        return role == 1 ? "管理员" : "普通用户";
+    public static String getRoleName(String roleCode) {
+        if (roleCode == null) return "普通用户";
+        return switch (roleCode) {
+            case "SUPER_ADMIN" -> "超级管理员";
+            case "OPERATOR" -> "运营专员";
+            case "AUDITOR" -> "审核专员";
+            case "PICKUP_ADMIN" -> "自提点管理员";
+            case "NORMAL_USER" -> "普通用户";
+            default -> roleCode;
+        };
+    }
+
+    public static String getDataScopeName(Integer dataScope) {
+        if (dataScope == null) return "本人";
+        return switch (dataScope) {
+            case 1 -> "全部";
+            case 2 -> "本部门及以下";
+            case 3 -> "本部门";
+            case 4 -> "本人";
+            case 5 -> "自定义";
+            default -> "未知";
+        };
+    }
+
+    public static String getPermissionTypeName(Integer permissionType) {
+        if (permissionType == null) return "未知";
+        return switch (permissionType) {
+            case 1 -> "菜单";
+            case 2 -> "按钮";
+            case 3 -> "接口";
+            default -> "未知";
+        };
     }
 }

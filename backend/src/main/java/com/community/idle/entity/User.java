@@ -29,7 +29,7 @@ public class User implements Serializable {
 
     private String avatar;
 
-    private Integer role;
+    private Long deptId;
 
     private Integer status;
 
@@ -48,7 +48,10 @@ public class User implements Serializable {
     private Integer claimCount;
 
     @TableField(exist = false)
-    private String roleName;
+    private java.util.List<String> roleNames;
+
+    @TableField(exist = false)
+    private java.util.List<Long> roleIds;
 
     @TableField(exist = false)
     private String statusName;
@@ -119,12 +122,12 @@ public class User implements Serializable {
         this.avatar = avatar;
     }
 
-    public Integer getRole() {
-        return role;
+    public Long getDeptId() {
+        return deptId;
     }
 
-    public void setRole(Integer role) {
-        this.role = role;
+    public void setDeptId(Long deptId) {
+        this.deptId = deptId;
     }
 
     public Integer getStatus() {
@@ -183,12 +186,20 @@ public class User implements Serializable {
         this.claimCount = claimCount;
     }
 
-    public String getRoleName() {
-        return roleName;
+    public java.util.List<String> getRoleNames() {
+        return roleNames;
     }
 
-    public void setRoleName(String roleName) {
-        this.roleName = roleName;
+    public void setRoleNames(java.util.List<String> roleNames) {
+        this.roleNames = roleNames;
+    }
+
+    public java.util.List<Long> getRoleIds() {
+        return roleIds;
+    }
+
+    public void setRoleIds(java.util.List<Long> roleIds) {
+        this.roleIds = roleIds;
     }
 
     public String getStatusName() {

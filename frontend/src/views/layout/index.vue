@@ -16,10 +16,28 @@
           active-text-color="#fff"
         >
           <template v-for="route in menuRoutes" :key="route.path">
-            <el-menu-item :index="'/' + route.path">
-              <el-icon><component :is="route.meta.icon" /></el-icon>
-              <template #title>{{ route.meta.title }}</template>
-            </el-menu-item>
+            <template v-if="route.children && route.children.length > 0">
+              <el-sub-menu :index="'/' + route.path">
+                <template #title>
+                  <el-icon><component :is="route.meta.icon" /></el-icon>
+                  <span>{{ route.meta.title }}</span>
+                </template>
+                <el-menu-item 
+                  v-for="child in route.children" 
+                  :key="child.path" 
+                  :index="'/' + route.path + '/' + child.path"
+                >
+                  <el-icon><component :is="child.meta.icon" /></el-icon>
+                  <template #title>{{ child.meta.title }}</template>
+                </el-menu-item>
+              </el-sub-menu>
+            </template>
+            <template v-else>
+              <el-menu-item :index="'/' + route.path">
+                <el-icon><component :is="route.meta.icon" /></el-icon>
+                <template #title>{{ route.meta.title }}</template>
+              </el-menu-item>
+            </template>
           </template>
         </el-menu>
       </el-aside>
@@ -86,8 +104,31 @@ const route = useRoute()
 const userStore = useUserStore()
 const isCollapse = ref(false)
 
+const permissionStore = usePermissionStore()
+
 const menuRoutes = computed(() => {
-  return router.options.routes.find(r => r.path === '/').children.filter(r => !r.meta?.hidden)
+  const rootRoute = router.options.routes.find(r => r.path === '/')
+  if (!rootRoute || !rootRoute.children) return []
+  
+  function filterRoutes(routes) {
+    return routes.filter(route => {
+      if (route.meta?.hidden) return false
+      
+      if (route.meta?.permission && !permissionStore.hasPermission(route.meta.permission)) {
+        return false
+      }
+      if (route.meta?.roles && !permissionStore.hasAnyRole(route.meta.roles)) {
+        return false
+      }
+      if (route.children) {
+        route.children = filterRoutes(route.children)
+        return route.children.length > 0
+      }
+      return true
+    })
+  }
+  
+  return filterRoutes([...rootRoute.children])
 })
 
 const activeMenu = computed(() => route.path)

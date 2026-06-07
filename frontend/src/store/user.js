@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { authApi } from '@/api'
+import { usePermissionStore } from './permission'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -11,6 +12,8 @@ export const useUserStore = defineStore('user', {
       const res = await authApi.login(loginData)
       this.token = res.token
       this.userInfo = res.user
+      const permissionStore = usePermissionStore()
+      permissionStore.setPermissions(res.user)
       return res
     },
     async register(registerData) {
@@ -19,11 +22,15 @@ export const useUserStore = defineStore('user', {
     async getCurrentUser() {
       const res = await authApi.getCurrentUser()
       this.userInfo = res
+      const permissionStore = usePermissionStore()
+      permissionStore.setPermissions(res)
       return res
     },
     logout() {
       this.token = ''
       this.userInfo = null
+      const permissionStore = usePermissionStore()
+      permissionStore.clearPermissions()
     }
   },
   persist: {

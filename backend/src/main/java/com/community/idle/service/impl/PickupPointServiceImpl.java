@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.community.idle.common.*;
+import com.community.idle.common.annotation.DataScope;
 import com.community.idle.entity.IdleItem;
 import com.community.idle.entity.PickupPoint;
 import com.community.idle.mapper.IdleItemMapper;
@@ -83,6 +84,7 @@ public class PickupPointServiceImpl implements PickupPointService {
     }
 
     @Override
+    @DataScope(businessType = "PICKUP_POINT", tableAlias = "", columnName = "id")
     public PageResult<PickupPoint> page(PageQuery query, String keyword, Integer status) {
         LambdaQueryWrapper<PickupPoint> wrapper = new LambdaQueryWrapper<>();
         if (StrUtil.isNotBlank(keyword)) {

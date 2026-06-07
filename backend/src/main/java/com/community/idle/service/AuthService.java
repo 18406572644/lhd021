@@ -1,7 +1,9 @@
 package com.community.idle.service;
 
+import com.community.idle.dto.AssignRoleDTO;
 import com.community.idle.dto.LoginDTO;
 import com.community.idle.dto.RegisterDTO;
+import com.community.idle.entity.Role;
 import com.community.idle.entity.User;
 
 import java.util.List;
@@ -12,5 +14,7 @@ public interface AuthService {
     void register(RegisterDTO dto);
     User getCurrentUser();
     List<User> listAllUsers();
+    void assignRoles(AssignRoleDTO dto);
+    List<Role> getUserRoles(Long userId);
     void logout();
 }

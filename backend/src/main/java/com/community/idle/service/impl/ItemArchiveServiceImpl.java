@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.community.idle.common.*;
+import com.community.idle.common.annotation.DataScope;
 import com.community.idle.entity.IdleItem;
 import com.community.idle.entity.ItemArchive;
 import com.community.idle.entity.PickupPoint;
@@ -138,6 +139,7 @@ public class ItemArchiveServiceImpl implements ItemArchiveService {
     }
 
     @Override
+    @DataScope(businessType = "PICKUP_POINT", tableAlias = "", columnName = "pickup_point_id", userScope = true, userColumnName = "user_id")
     public PageResult<ItemArchive> page(PageQuery query, String keyword, String archiveType) {
         LambdaQueryWrapper<ItemArchive> wrapper = new LambdaQueryWrapper<>();
         if (StrUtil.isNotBlank(keyword)) {
