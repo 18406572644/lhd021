@@ -54,6 +54,21 @@ public class User implements Serializable {
     private java.util.List<Long> roleIds;
 
     @TableField(exist = false)
+    private java.util.List<String> roles;
+
+    @TableField(exist = false)
+    private java.util.List<String> permissions;
+
+    @TableField(exist = false)
+    private java.util.List<String> apiPermissions;
+
+    @TableField(exist = false)
+    private java.util.List<DataPermission> dataPermissions;
+
+    @TableField(exist = false)
+    private Integer dataScopeType;
+
+    @TableField(exist = false)
     private String statusName;
 
     @TableField(fill = FieldFill.INSERT)
@@ -200,6 +215,46 @@ public class User implements Serializable {
 
     public void setRoleIds(java.util.List<Long> roleIds) {
         this.roleIds = roleIds;
+    }
+
+    public java.util.List<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(java.util.List<String> roles) {
+        this.roles = roles;
+    }
+
+    public java.util.List<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(java.util.List<String> permissions) {
+        this.permissions = permissions;
+    }
+
+    public java.util.List<String> getApiPermissions() {
+        return apiPermissions;
+    }
+
+    public void setApiPermissions(java.util.List<String> apiPermissions) {
+        this.apiPermissions = apiPermissions;
+    }
+
+    public java.util.List<DataPermission> getDataPermissions() {
+        return dataPermissions;
+    }
+
+    public void setDataPermissions(java.util.List<DataPermission> dataPermissions) {
+        this.dataPermissions = dataPermissions;
+    }
+
+    public Integer getDataScopeType() {
+        return dataScopeType;
+    }
+
+    public void setDataScopeType(Integer dataScopeType) {
+        this.dataScopeType = dataScopeType;
     }
 
     public String getStatusName() {

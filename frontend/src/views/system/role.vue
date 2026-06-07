@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span class="title">角色管理</span>
-          <el-button type="primary" @click="handleAdd" v-permission="'system:role:add'">
+          <el-button type="primary" @click="handleAdd" v-permission="'system_role_add'">
             <el-icon><Plus /></el-icon>
             新增角色
           </el-button>
@@ -37,7 +37,7 @@
               type="primary" 
               link 
               @click="handleAssignPermission(row)"
-              v-permission="'system:role:assign'"
+              v-permission="'system_role_assign_permission'"
             >
               分配权限
             </el-button>
@@ -45,7 +45,7 @@
               type="warning" 
               link 
               @click="handleAssignDataPermission(row)"
-              v-permission="'system:role:assign'"
+              v-permission="'system_role_assign_permission'"
             >
               数据权限
             </el-button>
@@ -53,7 +53,7 @@
               type="primary" 
               link 
               @click="handleEdit(row)"
-              v-permission="'system:role:edit'"
+              v-permission="'system_role_edit'"
             >
               编辑
             </el-button>
@@ -61,7 +61,7 @@
               type="danger" 
               link 
               @click="handleDelete(row)"
-              v-permission="'system:role:delete'"
+              v-permission="'system_role_delete'"
             >
               删除
             </el-button>

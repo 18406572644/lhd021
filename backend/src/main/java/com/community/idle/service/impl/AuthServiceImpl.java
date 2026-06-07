@@ -9,10 +9,12 @@ import com.community.idle.common.annotation.DataScope;
 import com.community.idle.dto.AssignRoleDTO;
 import com.community.idle.dto.LoginDTO;
 import com.community.idle.dto.RegisterDTO;
+import com.community.idle.entity.DataPermission;
 import com.community.idle.entity.Permission;
 import com.community.idle.entity.Role;
 import com.community.idle.entity.User;
 import com.community.idle.entity.UserRole;
+import com.community.idle.mapper.DataPermissionMapper;
 import com.community.idle.mapper.PermissionMapper;
 import com.community.idle.mapper.RoleMapper;
 import com.community.idle.mapper.UserMapper;
@@ -34,13 +36,15 @@ public class AuthServiceImpl implements AuthService {
     private final RoleMapper roleMapper;
     private final UserRoleMapper userRoleMapper;
     private final PermissionMapper permissionMapper;
+    private final DataPermissionMapper dataPermissionMapper;
 
-    public AuthServiceImpl(UserMapper userMapper, JwtUtils jwtUtils, RoleMapper roleMapper, UserRoleMapper userRoleMapper, PermissionMapper permissionMapper) {
+    public AuthServiceImpl(UserMapper userMapper, JwtUtils jwtUtils, RoleMapper roleMapper, UserRoleMapper userRoleMapper, PermissionMapper permissionMapper, DataPermissionMapper dataPermissionMapper) {
         this.userMapper = userMapper;
         this.jwtUtils = jwtUtils;
         this.roleMapper = roleMapper;
         this.userRoleMapper = userRoleMapper;
         this.permissionMapper = permissionMapper;
+        this.dataPermissionMapper = dataPermissionMapper;
     }
 
     @Override
@@ -78,7 +82,20 @@ public class AuthServiceImpl implements AuthService {
                 .map(Role::getRoleCode)
                 .collect(Collectors.toList());
         List<String> permissions = loadUserPermissions(user.getId());
+        List<String> apiPermissions = loadApiPermissions(user.getId());
+        List<DataPermission> dataPermissions = loadDataPermissions(user.getId());
+        Integer dataScopeType = roles.stream()
+                .map(Role::getDataScope)
+                .filter(Objects::nonNull)
+                .min(Integer::compareTo)
+                .orElse(1);
         List<Permission> menuTree = buildMenuTree(user.getId());
+
+        user.setRoles(roleCodes);
+        user.setPermissions(permissions);
+        user.setApiPermissions(apiPermissions);
+        user.setDataPermissions(dataPermissions);
+        user.setDataScopeType(dataScopeType);
 
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
@@ -91,6 +108,14 @@ public class AuthServiceImpl implements AuthService {
 
     private List<String> loadUserPermissions(Long userId) {
         return permissionMapper.selectPermissionCodesByUserId(userId);
+    }
+
+    private List<String> loadApiPermissions(Long userId) {
+        return permissionMapper.selectApiPermissionsByUserId(userId);
+    }
+
+    private List<DataPermission> loadDataPermissions(Long userId) {
+        return dataPermissionMapper.selectDataPermissionsByUserId(userId);
     }
 
     private List<Permission> buildMenuTree(Long userId) {
@@ -166,8 +191,20 @@ public class AuthServiceImpl implements AuthService {
         List<String> roleNames = roles.stream()
                 .map(Role::getRoleName)
                 .collect(Collectors.toList());
+        List<String> roleCodes = roles.stream()
+                .map(Role::getRoleCode)
+                .collect(Collectors.toList());
         user.setRoleNames(roleNames);
         user.setRoleIds(roles.stream().map(Role::getId).collect(Collectors.toList()));
+        user.setRoles(roleCodes);
+        user.setPermissions(loadUserPermissions(userId));
+        user.setApiPermissions(loadApiPermissions(userId));
+        user.setDataPermissions(loadDataPermissions(userId));
+        user.setDataScopeType(roles.stream()
+                .map(Role::getDataScope)
+                .filter(Objects::nonNull)
+                .min(Integer::compareTo)
+                .orElse(1));
         return EntityConverter.convertUser(user);
     }
 

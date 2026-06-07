@@ -5,7 +5,7 @@
         <div class="card-header">
           <span class="title">权限管理</span>
           <div class="header-actions">
-            <el-button type="primary" @click="handleAdd(null)" v-permission="'system:permission:add'">
+            <el-button type="primary" @click="handleAdd(null)" v-permission="'system_permission_add'">
               <el-icon><Plus /></el-icon>
               新增顶级权限
             </el-button>
@@ -37,7 +37,7 @@
               type="primary" 
               link 
               @click="handleAdd(row)"
-              v-permission="'system:permission:add'"
+              v-permission="'system_permission_add'"
             >
               添加子权限
             </el-button>
@@ -45,7 +45,7 @@
               type="primary" 
               link 
               @click="handleEdit(row)"
-              v-permission="'system:permission:edit'"
+              v-permission="'system_permission_edit'"
             >
               编辑
             </el-button>
@@ -53,7 +53,7 @@
               type="danger" 
               link 
               @click="handleDelete(row)"
-              v-permission="'system:permission:delete'"
+              v-permission="'system_permission_delete'"
             >
               删除
             </el-button>
@@ -90,7 +90,7 @@
           <el-input v-model="form.permissionName" placeholder="请输入权限名称" />
         </el-form-item>
         <el-form-item label="权限编码" prop="permissionCode">
-          <el-input v-model="form.permissionCode" placeholder="请输入权限编码，如：user:add" />
+          <el-input v-model="form.permissionCode" placeholder="请输入权限编码，如：user_add" />
         </el-form-item>
         <el-form-item v-if="form.permissionType === 1" label="路由路径" prop="path">
           <el-input v-model="form.path" placeholder="请输入路由路径" />

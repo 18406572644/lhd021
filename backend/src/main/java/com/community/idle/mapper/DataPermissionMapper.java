@@ -15,4 +15,6 @@ public interface DataPermissionMapper extends BaseMapper<DataPermission> {
     int batchInsert(@Param("list") List<DataPermission> list);
 
     List<Long> selectBusinessIdsByUserIdAndBusinessType(@Param("userId") Long userId, @Param("businessType") String businessType);
+
+    List<DataPermission> selectDataPermissionsByUserId(@Param("userId") Long userId);
 }

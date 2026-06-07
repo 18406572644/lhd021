@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span class="title">操作日志</span>
-          <el-button type="primary" @click="handleExport" v-permission="'system:operation-log:export'">
+          <el-button type="primary" @click="handleExport" v-permission="'operation_log_export'">
             <el-icon><Download /></el-icon>
             导出日志
           </el-button>
@@ -90,7 +90,7 @@
               type="primary"
               link
               @click="handleViewDetail(row)"
-              v-permission="'system:operation-log:view'"
+              v-permission="'operation_log_detail'"
             >
               详情
             </el-button>

@@ -50,7 +50,7 @@
               type="primary" 
               link 
               @click="handleAssignRole(row)"
-              v-permission="'system:user:assign'"
+              v-permission="'system_user_assign_role'"
             >
               分配角色
             </el-button>
@@ -59,7 +59,7 @@
               type="danger" 
               link 
               @click="handleDisable(row)"
-              v-permission="'system:user:edit'"
+              v-permission="'system_user_edit'"
             >
               禁用
             </el-button>
@@ -68,7 +68,7 @@
               type="success" 
               link 
               @click="handleEnable(row)"
-              v-permission="'system:user:edit'"
+              v-permission="'system_user_edit'"
             >
               启用
             </el-button>
